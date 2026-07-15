@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "exportedAt": "2026-07-15T22:53:45.830Z",
+  "exportedAt": "2026-07-15T23:27:50.949Z",
   "state": {
-    "current": 83,
+    "current": 105,
     "answers": {
       "7": [
         "D"
@@ -267,7 +267,85 @@
       "83": {
         "0": "Generated answer rate and quality",
         "1": "Topics by outcome"
-      }
+      },
+      "84": [
+        "C"
+      ],
+      "85": [
+        "B"
+      ],
+      "86": {
+        "0": "Move to a multi-agent architecture.",
+        "1": "Add a grounding data source."
+      },
+      "87": [
+        "D"
+      ],
+      "88": [
+        "B"
+      ],
+      "89": [
+        "C"
+      ],
+      "90": [
+        "B"
+      ],
+      "91": [
+        "C"
+      ],
+      "92": {
+        "0": "Microsoft Copilot Studio",
+        "1": "a Fallback topic"
+      },
+      "93": [
+        "A"
+      ],
+      "94": {
+        "0": "Azure Resource Monitor (ARM)",
+        "1": "the current cost of the Dynamics 365 Sales licenses"
+      },
+      "95": [
+        "B"
+      ],
+      "96": {
+        "0": "the ALM Accelerator for Microsoft Power Platform",
+        "1": "Success by Design"
+      },
+      "97": [
+        "B"
+      ],
+      "98": [
+        "C"
+      ],
+      "99": [
+        "D",
+        "A"
+      ],
+      "100": {
+        "0": "an Azure AI Bot Service channel",
+        "1": "a tool"
+      },
+      "101": [
+        "A",
+        "C"
+      ],
+      "102": {
+        "0": "Microsoft Purview",
+        "1": "Copilot Studio"
+      },
+      "103": [
+        "A"
+      ],
+      "104": {
+        "0": "Tool use",
+        "1": "Effectiveness"
+      },
+      "105": [
+        "A"
+      ],
+      "106": [
+        "C"
+      ]
     },
     "checked": {
       "1": false,
@@ -348,7 +426,30 @@
       "80": true,
       "81": true,
       "82": true,
-      "83": true
+      "83": true,
+      "84": true,
+      "85": true,
+      "86": true,
+      "87": true,
+      "88": true,
+      "89": true,
+      "90": true,
+      "91": true,
+      "92": true,
+      "93": true,
+      "94": true,
+      "95": true,
+      "96": true,
+      "97": true,
+      "98": true,
+      "99": true,
+      "100": true,
+      "101": true,
+      "102": true,
+      "103": true,
+      "104": true,
+      "105": true,
+      "106": true
     },
     "flags": {
       "27": true,
@@ -362,7 +463,7 @@
       "59": true,
       "63": true
     },
-    "elapsed": 8544,
+    "elapsed": 9617,
     "paused": false,
     "mode": "practice",
     "retryQueue": [
