@@ -524,9 +524,9 @@
 
   function updateStats() {
     const scope = scopedQuestions();
-    const done = scope.filter(answered).length;
+    const done = scope.filter((q) => answered(q)).length;
     const graded = scope.filter((q) => isGradable(q) && answered(q));
-    const correct = graded.filter(isCorrect).length;
+    const correct = graded.filter((q) => isCorrect(q)).length;
     els.progressText.textContent = `${done} / ${scope.length}`;
     els.progressBar.style.width = `${scope.length ? done / scope.length * 100 : 0}%`;
     els.scoreText.textContent = `${correct} / ${graded.length}`;
@@ -535,12 +535,12 @@
   function showResults() {
     const scope = scopedQuestions();
     const graded = scope.filter((q) => isGradable(q) && answered(q));
-    const correct = graded.filter(isCorrect).length;
+    const correct = graded.filter((q) => isCorrect(q)).length;
     const percent = graded.length ? Math.round(correct / graded.length * 100) : 0;
     els.resultScore.textContent = `${percent}%`;
     els.resultCopy.textContent = state.mode === "retry"
-      ? `Đúng ${correct}/${graded.length} câu đã trả lời. Đã làm lại ${scope.filter(answered).length}/${scope.length} câu sai hoặc được đánh dấu.`
-      : `Đúng ${correct}/${graded.length} câu có thể chấm tự động. Đã xử lý ${scope.filter(answered).length}/${scope.length} câu toàn bộ đề.`;
+      ? `Đúng ${correct}/${graded.length} câu đã trả lời. Đã làm lại ${scope.filter((q) => answered(q)).length}/${scope.length} câu sai hoặc được đánh dấu.`
+      : `Đúng ${correct}/${graded.length} câu có thể chấm tự động. Đã xử lý ${scope.filter((q) => answered(q)).length}/${scope.length} câu toàn bộ đề.`;
     els.dialog.showModal();
   }
 

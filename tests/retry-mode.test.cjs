@@ -86,6 +86,7 @@ function bootApp(initialState) {
       select.value = mode;
       select.listeners.change();
     },
+    text(id) { return elements.get(id).textContent; },
     state() { return JSON.parse(localStorage.getItem("ab100-mock-state-v1")); }
   };
 }
@@ -127,4 +128,20 @@ test("retry mode includes a flagged question even when its practice answer is co
   assert.deepEqual(app.state().retryQueue, [1]);
   assert.deepEqual(app.state().answers[1], ["B"]);
   assert.equal(app.state().retryAnswers[1], undefined);
+});
+
+test("progress and score count stored answers after loading state", () => {
+  const app = bootApp({
+    current: 0,
+    answers: { 1: ["B"] },
+    checked: { 1: true },
+    flags: {},
+    elapsed: 0,
+    paused: false,
+    mode: "practice",
+    retryQueue: []
+  });
+
+  assert.equal(app.text("progressText"), "1 / 1");
+  assert.equal(app.text("scoreText"), "1 / 1");
 });
