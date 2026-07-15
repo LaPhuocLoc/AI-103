@@ -77,6 +77,12 @@ button { cursor: pointer; }
   overflow-y: auto;
   z-index: 20;
 }
+.sidebar-close {
+  position: absolute; top: 15px; right: 15px; width: 38px; height: 38px;
+  border: 1px solid rgba(255,255,255,.18); border-radius: 11px;
+  background: rgba(255,255,255,.08); color: #fff; font-size: 25px; line-height: 1;
+}
+.sidebar-backdrop { display: none; }
 .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
 .brand-mark {
   display: grid; place-items: center; width: 44px; height: 44px;
@@ -210,8 +216,15 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 
 @media (max-width: 900px) {
   .app-shell { display: block; }
-  .sidebar { transform: translateX(-102%); transition: transform .22s ease; box-shadow: 16px 0 50px rgba(0,0,0,.2); }
+  .sidebar { width: min(86vw, 320px); transform: translateX(-102%); transition: transform .22s ease; box-shadow: 16px 0 50px rgba(0,0,0,.2); }
   .sidebar.open { transform: translateX(0); }
+  .sidebar-backdrop {
+    position: fixed; inset: 0; z-index: 15; display: block; border: 0;
+    background: rgba(3,10,7,.62); opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .2s ease, visibility .2s ease;
+  }
+  .sidebar-backdrop.open { opacity: 1; visibility: visible; pointer-events: auto; }
+  body.sidebar-open { overflow: hidden; }
   .main { grid-column: auto; }
   .mobile-only { display: block; }
   .topbar { padding: 16px 20px; }
@@ -221,7 +234,12 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   .drag-hint { grid-column: auto; }
 }
 @media (max-width: 620px) {
-  .topbar .eyebrow, .mode-switch { display: none; }
+  .topbar .eyebrow { display: none; }
+  .topbar { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px 12px; }
+  .topbar h1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .top-actions { grid-column: 1 / -1; width: 100%; display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: end; }
+  .mode-switch { display: block; min-width: 0; }
+  .mode-switch select { width: 100%; min-width: 0; }
   .question-card, .answer-card { padding: 22px 18px; border-radius: 16px; }
   .question-stem { font-size: 15px; }
   .question-actions { grid-template-columns: 1fr 1fr; }

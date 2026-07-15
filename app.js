@@ -13,7 +13,8 @@
     timerToggle: $("timerToggle"), mode: $("modeSelect"), finish: $("finishButton"), clear: $("clearProgress"), theme: $("themeToggle"),
     exportProgress: $("exportProgress"), loadProgress: $("loadProgress"), syncStatus: $("syncStatus"),
     dialog: $("resultDialog"), resultScore: $("resultScore"), resultCopy: $("resultCopy"),
-    close: $("dialogClose"), continue: $("continueButton"), reviewWrong: $("reviewWrong"), sidebar: $("sidebar"), menu: $("menuButton")
+    close: $("dialogClose"), continue: $("continueButton"), reviewWrong: $("reviewWrong"), sidebar: $("sidebar"), menu: $("menuButton"),
+    sidebarClose: $("sidebarClose"), sidebarBackdrop: $("sidebarBackdrop")
   };
 
   const blankState = () => ({
@@ -460,7 +461,14 @@
     saveState();
     renderQuestion();
     window.scrollTo({ top: 0, behavior: "smooth" });
-    els.sidebar.classList.remove("open");
+    setSidebarOpen(false);
+  }
+
+  function setSidebarOpen(open) {
+    els.sidebar.classList.toggle("open", open);
+    els.sidebarBackdrop.classList.toggle("open", open);
+    document.body.classList.toggle("sidebar-open", open);
+    els.menu.setAttribute("aria-expanded", String(open));
   }
 
   function goRelative(offset) {
@@ -576,7 +584,10 @@
   els.close.addEventListener("click", () => els.dialog.close());
   els.continue.addEventListener("click", () => els.dialog.close());
   els.reviewWrong.addEventListener("click", reviewWrong);
-  els.menu.addEventListener("click", () => els.sidebar.classList.toggle("open"));
+  els.menu.addEventListener("click", () => setSidebarOpen(!els.sidebar.classList.contains("open")));
+  els.sidebarClose.addEventListener("click", () => setSidebarOpen(false));
+  els.sidebarBackdrop.addEventListener("click", () => setSidebarOpen(false));
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape") setSidebarOpen(false); });
   els.theme.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
   els.timerToggle.addEventListener("click", () => { state.paused = !state.paused; els.timerToggle.textContent = state.paused ? "Tiếp tục" : "Tạm dừng"; saveState(); });
   els.exportProgress.addEventListener("click", exportProgress);

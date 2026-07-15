@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "exportedAt": "2026-07-15T23:27:50.949Z",
+  "exportedAt": "2026-07-15T23:31:15.851Z",
   "state": {
-    "current": 105,
+    "current": 13,
     "answers": {
       "7": [
         "D"
@@ -463,9 +463,9 @@
       "59": true,
       "63": true
     },
-    "elapsed": 9617,
+    "elapsed": 9709,
     "paused": false,
-    "mode": "practice",
+    "mode": "retry",
     "retryQueue": [
       14,
       16,
@@ -509,7 +509,22 @@
       79,
       58,
       59,
-      63
+      63,
+      85,
+      87,
+      91,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      106
     ],
     "retryAnswers": {},
     "retryChecked": {}

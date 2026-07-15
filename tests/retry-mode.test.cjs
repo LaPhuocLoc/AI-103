@@ -31,7 +31,7 @@ function bootApp(initialState) {
     "answerCard", "answerStatus", "correctAnswer", "explanationText", "pageLink", "prevButton",
     "nextButton", "checkButton", "flagButton", "progressText", "progressBar", "scoreText", "timer",
     "timerToggle", "modeSelect", "finishButton", "clearProgress", "themeToggle", "exportProgress",
-    "loadProgress", "syncStatus", "resultDialog",
+    "loadProgress", "syncStatus", "sidebarClose", "sidebarBackdrop", "resultDialog",
     "resultScore", "resultCopy", "dialogClose", "continueButton", "reviewWrong", "sidebar", "menuButton"
   ];
   const elements = new Map(ids.map((id) => [id, new ElementStub(id)]));

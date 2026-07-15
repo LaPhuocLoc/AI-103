@@ -11,11 +11,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
+      <button class="sidebar-close mobile-only" id="sidebarClose" type="button" aria-label="Đóng danh sách câu hỏi">×</button>
       <div class="brand">
         <div class="brand-mark">AB</div>
         <div><strong>AB-100</strong><span>Mock exam studio</span></div>
@@ -49,6 +50,7 @@
       <nav class="question-grid" id="questionGrid" aria-label="Danh sách câu hỏi"></nav>
       <a class="source-link" href="AB-100.pdf" target="_blank" rel="noopener">Mở đề PDF gốc ↗</a>
     </aside>
+    <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Đóng danh sách câu hỏi" tabindex="-1"></button>
 
     <main class="main">
       <header class="topbar">
@@ -117,6 +119,6 @@
 
   <script src="questions.js"></script>
   <script src="matching-data.js"></script>
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>
