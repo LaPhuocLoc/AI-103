@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AB-100 mock exam - 106 câu hỏi luyện thi từ tài liệu AB-100.">
+  <title>AB-100 Mock Exam</title>
+  <script>
+    document.documentElement.dataset.theme = localStorage.getItem('ab100-theme') || 'dark';
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">AB</div>
+        <div><strong>AB-100</strong><span>Mock exam studio</span></div>
+      </div>
+
+      <section class="side-card timer-card">
+        <span class="eyebrow">Thời gian</span>
+        <div class="timer" id="timer">00:00:00</div>
+        <button class="text-button" id="timerToggle">Tạm dừng</button>
+      </section>
+
+      <section class="side-card progress-card">
+        <div class="progress-copy"><span>Tiến độ</span><strong id="progressText">0 / 106</strong></div>
+        <div class="progress-track"><span id="progressBar"></span></div>
+        <div class="score-row"><span>Đúng</span><strong id="scoreText">0 / 0</strong></div>
+      </section>
+
+      <section class="side-card sync-card">
+        <span class="eyebrow">State trong Git</span>
+        <p id="syncStatus">State đang lưu trên thiết bị này.</p>
+        <div class="sync-actions">
+          <button type="button" id="exportProgress">Xuất file state</button>
+          <button type="button" id="loadProgress">Nạp từ Git</button>
+        </div>
+      </section>
+
+      <div class="question-nav-head">
+        <span>Câu hỏi</span>
+        <button class="text-button" id="clearProgress">Làm lại</button>
+      </div>
+      <nav class="question-grid" id="questionGrid" aria-label="Danh sách câu hỏi"></nav>
+      <a class="source-link" href="AB-100.pdf" target="_blank" rel="noopener">Mở đề PDF gốc ↗</a>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-button mobile-only" id="menuButton" aria-label="Mở danh sách câu hỏi">☰</button>
+        <div>
+          <span class="eyebrow">Microsoft certification practice</span>
+          <h1>Agentic AI Business Solutions Architect</h1>
+        </div>
+        <div class="top-actions">
+          <button class="secondary-button theme-button" id="themeToggle" aria-label="Đổi giao diện sáng tối">☀ Chế độ sáng</button>
+          <label class="mode-switch">
+            <span>Chế độ</span>
+            <select id="modeSelect">
+              <option value="practice">Luyện tập</option>
+              <option value="exam">Thi thử</option>
+              <option value="retry">Làm lại câu sai</option>
+            </select>
+          </label>
+          <button class="secondary-button" id="finishButton">Nộp bài</button>
+        </div>
+      </header>
+
+      <div class="content-wrap">
+        <section class="question-card" id="questionCard">
+          <div class="question-meta">
+            <div><span class="question-number" id="questionNumber">Câu 1</span><span class="type-pill" id="typePill">Chọn một đáp án</span></div>
+            <button class="flag-button" id="flagButton" aria-pressed="false">☆ Đánh dấu</button>
+          </div>
+          <div class="question-stem" id="questionStem"></div>
+          <div class="choices" id="choices"></div>
+          <div class="manual-note" id="manualNote" hidden></div>
+
+          <div class="question-actions">
+            <button class="secondary-button" id="prevButton">← Câu trước</button>
+            <button class="primary-button" id="checkButton">Kiểm tra đáp án</button>
+            <button class="secondary-button" id="nextButton">Câu tiếp →</button>
+          </div>
+        </section>
+
+        <section class="answer-card" id="answerCard" hidden>
+          <div class="answer-heading">
+            <div><span class="eyebrow">Đáp án & giải thích</span><h2 id="answerStatus">Đáp án đúng</h2></div>
+            <a id="pageLink" href="AB-100.pdf#page=2" target="_blank" rel="noopener">Trang nguồn ↗</a>
+          </div>
+          <div class="correct-answer" id="correctAnswer"></div>
+          <details class="explanation" open>
+            <summary>Giải thích chi tiết</summary>
+            <div id="explanationText"></div>
+          </details>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <dialog class="result-dialog" id="resultDialog">
+    <button class="dialog-close" id="dialogClose" aria-label="Đóng">×</button>
+    <span class="eyebrow">Kết quả hiện tại</span>
+    <h2 id="resultTitle">Bạn đã hoàn thành!</h2>
+    <div class="result-score" id="resultScore">0%</div>
+    <p id="resultCopy"></p>
+    <div class="dialog-actions">
+      <button class="primary-button" id="reviewWrong">Xem câu sai / chưa làm</button>
+      <button class="secondary-button" id="continueButton">Tiếp tục làm bài</button>
+    </div>
+  </dialog>
+
+  <script src="questions.js"></script>
+  <script src="matching-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
