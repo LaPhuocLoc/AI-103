@@ -1,19 +1,39 @@
-# AB-100 Mock Exam
+# AI-103 Mock Exam
 
-Trang luyện đề tĩnh được tạo từ `AB-100.pdf`, gồm đầy đủ 106 câu hỏi, đáp án và phần giải thích. Cả 33 câu ghép cặp/tình huống trong ảnh PDF đã được đối ứng và chấm tự động; 11 câu dạng kéo thả trong đề gốc hỗ trợ kéo bằng chuột, bút, cảm ứng và thao tác chạm chọn trên điện thoại.
+Trang luyện thi tĩnh gồm 107 câu hỏi AI-103. Nội dung câu hỏi, lựa chọn, đáp án và phần giải thích được giữ bằng tiếng Anh theo tài liệu nguồn; các nút điều khiển và thông báo của giao diện dùng tiếng Việt.
 
-Mở trực tiếp `index.html` bằng trình duyệt. Trang tự lưu tiến độ tức thời trong `localStorage`, hỗ trợ chế độ luyện tập/thi thử, đồng hồ, đánh dấu câu và điều hướng nhanh.
+## Chạy ứng dụng
 
-## Đồng bộ state qua Git
+Mở trực tiếp `index.html` bằng trình duyệt để học trên máy cá nhân. Khi triển khai lên web, hãy phục vụ toàn bộ thư mục bằng một máy chủ tĩnh để ứng dụng có thể tải PDF và state đã commit.
 
-1. Trên thiết bị đang làm bài, bấm **Xuất file state**.
-2. Thay file `progress-state.json` trong repo bằng file vừa tải xuống, sau đó commit/push và deploy web.
-3. Trên điện thoại mới, website tự nạp file state đã commit. Nếu điện thoại đã có state riêng, bấm **Nạp từ Git** để ghi đè bằng bản trong repo.
+Ứng dụng có ba chế độ:
 
-Website tĩnh không thể tự ghi ngược vào Git. Mỗi khi muốn đẩy tiến độ mới lên repo, cần xuất lại `progress-state.json` và commit file đó.
+- **Luyện tập**: kiểm tra từng câu và xem đáp án, giải thích ngay.
+- **Thi thử**: làm bài liên tục, không hiện đáp án trước khi kết thúc.
+- **Làm lại câu sai**: tạo danh sách từ các câu trả lời sai, câu chưa hoàn thành và câu đã đánh dấu.
 
-Nếu PDF nguồn thay đổi, chạy lại:
+## Lưu và chuyển tiến độ
+
+Tiến độ được tự động lưu cục bộ trong `localStorage` của từng trình duyệt. Dữ liệu cục bộ không tự đồng bộ sang thiết bị khác và website tĩnh không thể tự ghi vào Git.
+
+Để chuyển hoặc lưu một bản tiến độ dùng chung:
+
+1. Bấm **Xuất file state**. Trình duyệt tải xuống `ai103-progress-state.json`.
+2. Có thể lưu file này làm bản sao cá nhân. Nếu muốn website triển khai nạp bản đó, thay file `ai103-progress-state.json` đã commit trong repository rồi commit và triển khai lại.
+3. Trên trình duyệt khác, bấm **Nạp từ Git** để tải bản state đã triển khai. Thao tác này ghi đè tiến độ cục bộ khi file chứa dữ liệu làm bài.
+
+File `ai103-progress-state.json` đi kèm repository là state sạch ở chế độ luyện tập. Chỉ file có tên này được ứng dụng xuất và tải; không đổi sang tên khác.
+
+## Tạo lại dữ liệu từ PDF
+
+Script trích xuất đọc PDF nguồn tại `C:\Users\Admin\Downloads\Certs\pdf\AI-103.pdf`, tạo lại `questions.js`, đồng thời sao chép PDF thành `AI-103.pdf` trong repository. Cài `pdfplumber`, đặt file nguồn đúng đường dẫn trên, rồi chạy từ thư mục gốc dự án:
 
 ```powershell
-& 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' tools\extract_pdf.py
+python tools/extract_pdf.py
+```
+
+Sau khi tạo lại, chạy kiểm thử dữ liệu:
+
+```powershell
+node --test tests/question-data.test.cjs
 ```

@@ -70,3 +70,30 @@ test("application consumes only AI-103 browser globals and keys", () => {
     assert.doesNotMatch(app, staleContract);
   }
 });
+
+test("repository documentation and portable state are AI-103-specific", () => {
+  const root = require.resolve("../README.md").replace(/[\\/]README\.md$/, "");
+  const readmeBytes = fs.readFileSync(require.resolve("../README.md"));
+  const readme = new TextDecoder("utf-8", { fatal: true }).decode(readmeBytes);
+  const state = JSON.parse(fs.readFileSync(require.resolve("../ai103-progress-state.json"), "utf8"));
+  assert.match(readme, /AI-103 Mock Exam/);
+  assert.match(readme, /107/);
+  assert.match(readme, /tiếng Việt/);
+  assert.doesNotMatch(readme, /AB-100/);
+  assert.deepEqual(state.state, {
+    current: 0,
+    answers: {},
+    checked: {},
+    flags: {},
+    elapsed: 0,
+    paused: false,
+    mode: "practice",
+    retryQueue: [],
+    retryAnswers: {},
+    retryChecked: {}
+  });
+  assert.equal(state.schemaVersion, 1);
+  assert.equal(fs.existsSync(`${root}/progress-state.json`), false);
+  assert.equal(fs.existsSync(`${root}/AB-100.pdf`), false);
+  assert.deepEqual(fs.readdirSync(root).filter((name) => name.endsWith(".pdf")), ["AI-103.pdf"]);
+});
