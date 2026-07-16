@@ -17,7 +17,7 @@ EXPECTED_IDS = list(range(1, 108))
 
 def clean(text: str) -> str:
     text = text.replace(HEADER, "").replace(FOOTER, "")
-    text = text.replace("\u2022", "â€¢").replace("\u2019", "'")
+    text = text.replace("\u2019", "'")
     text = re.sub(r"[ \t]+\n", "\n", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
@@ -88,7 +88,9 @@ def extract_questions(source: Path) -> list[dict]:
         end = matches[index + 1].start() if index + 1 < len(matches) else len(full_text)
         block = full_text[match.end():end].strip()
         question_part, answer_part = (block.split("Answer:", 1) + [""])[:2]
-        raw_answer, explanation = (answer_part.split("Explanation:", 1) + [""])[:2]
+        raw_answer, explanation = (
+            re.split(r"(?m)^Explanation:?\s*$", answer_part, maxsplit=1) + [""]
+        )[:2]
         choices, stem = parse_choices(question_part.strip())
         letters = answer_letters(raw_answer.strip(), choices)
         start_page = next(
