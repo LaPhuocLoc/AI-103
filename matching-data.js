@@ -120,3 +120,5 @@ window.AI103_MATCHING = {
     { prompt: "Version update policy", options: ["Once the current version expires", "Opt out of automatic model version upgrades", "Upgrade once a new default version becomes available"], correct: "Opt out of automatic model version upgrades" }
   ]
 };
+
+window.AI103_DRAG_IDS = [6, 16, 26, 36, 46, 56, 66, 76, 86];

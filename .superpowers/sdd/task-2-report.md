@@ -113,3 +113,37 @@ Additional key-set audit loaded both globals in a VM and compared all no-choice 
 
 - `app.js` still references `window.AB100_QUESTIONS`, `window.AB100_MATCHING`, and an obsolete AB-100 drag-ID set. Updating application integration is outside Task 2's declared files; the later app task must switch to `AI103_QUESTIONS`, `AI103_MATCHING`, and drag IDs `[6, 16, 26, 36, 46, 56, 66, 76, 86]`.
 - The source PDF contains some inconsistent capitalization between equivalent tool names across questions (for example `Code interpreter` vs `Code Interpreter Tool`). The mappings retain each control's displayed text so grading matches the rendered options exactly.
+
+## Quality-gate follow-up: exact key and drag contracts
+
+The quality review found that the original option-integrity loop was vacuously true for an empty `AI103_MATCHING` object and that the drag subset existed only in prose. The follow-up added:
+
+- An exact equality assertion for the 29 reviewed matching keys: `[3, 6, 9, 10, 13, 16, 19, 23, 26, 29, 33, 36, 43, 46, 49, 53, 56, 59, 63, 66, 69, 73, 76, 79, 83, 86, 89, 93, 101]`.
+- A machine-readable `window.AI103_DRAG_IDS = [6, 16, 26, 36, 46, 56, 66, 76, 86]` export.
+- An exact equality assertion for `AI103_DRAG_IDS`, preventing later code from incorrectly deriving drag behavior from group count.
+
+### Follow-up RED
+
+After adding both contract tests and before adding the drag export, ran:
+
+```powershell
+node --test tests/question-data.test.cjs
+```
+
+Result: exit code 1; 5 tests total, 4 passed, 1 failed. The exact matching-key test passed. `drag data exposes the exact reviewed drag question set` failed at `Array.from(AI103_DRAG_IDS)` with `TypeError: undefined is not iterable`, proving that the machine-readable drag contract was missing.
+
+### Follow-up GREEN
+
+After adding the minimal `AI103_DRAG_IDS` export, ran:
+
+```powershell
+node --test tests/question-data.test.cjs
+node --test tests/*.test.cjs
+```
+
+Results:
+
+- Targeted data suite: exit code 0; 5 passed, 0 failed.
+- Full existing Node suite: exit code 0; 10 passed, 0 failed.
+
+The follow-up changes affect `matching-data.js`, `tests/question-data.test.cjs`, and this report. The remaining application-integration concern is unchanged: `app.js` must consume `window.AI103_DRAG_IDS` in the later integration task.
