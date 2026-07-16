@@ -49,8 +49,24 @@ test("every question can be graded or explicitly reviewed manually", () => {
 
 test("application consumes only AI-103 browser globals and keys", () => {
   const app = fs.readFileSync(require.resolve("../app.js"), "utf8");
-  assert.match(app, /AI103_QUESTIONS/);
-  assert.match(app, /AI103_MATCHING/);
-  assert.match(app, /ai103-mock-state-v1/);
-  assert.doesNotMatch(app, /AB100_|ab100-mock-state/);
+  for (const contract of [
+    "AI103_QUESTIONS",
+    "AI103_MATCHING",
+    "AI103_DRAG_IDS",
+    "ai103-mock-state-v1",
+    "ai103-theme",
+    "AI-103.pdf",
+    "ai103-progress-state.json"
+  ]) {
+    assert.ok(app.includes(contract), `missing AI-103 application contract: ${contract}`);
+  }
+  for (const staleContract of [
+    /AB100_/,
+    /ab100-mock-state/,
+    /ab100-theme/,
+    /AB-100\.pdf/,
+    /["'`]progress-state\.json["'`]/
+  ]) {
+    assert.doesNotMatch(app, staleContract);
+  }
 });

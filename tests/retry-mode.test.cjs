@@ -25,7 +25,7 @@ class ElementStub {
   close() {}
 }
 
-function bootApp(initialState) {
+function bootApp(initialState, { abState = { current: 99 } } = {}) {
   const ids = [
     "questionGrid", "questionNumber", "typePill", "questionStem", "choices", "manualNote",
     "answerCard", "answerStatus", "correctAnswer", "explanationText", "pageLink", "prevButton",
@@ -36,10 +36,10 @@ function bootApp(initialState) {
   ];
   const elements = new Map(ids.map((id) => [id, new ElementStub(id)]));
   const storage = new Map([
-    ["ai103-mock-state-v1", JSON.stringify(initialState)],
     ["ai103-theme", "dark"],
-    ["ab100-mock-state-v1", JSON.stringify({ current: 99 })]
+    ["ab100-mock-state-v1", JSON.stringify(abState)]
   ]);
+  if (initialState !== undefined) storage.set("ai103-mock-state-v1", JSON.stringify(initialState));
   const localStorage = {
     getItem(key) { return storage.has(key) ? storage.get(key) : null; },
     setItem(key, value) { storage.set(key, String(value)); }
@@ -88,14 +88,34 @@ function bootApp(initialState) {
       select.value = mode;
       select.listeners.change();
     },
+    toggleFlag() { elements.get("flagButton").listeners.click(); },
     text(id) { return elements.get(id).textContent; },
-    state() { return JSON.parse(localStorage.getItem("ai103-mock-state-v1")); }
+    state() { return JSON.parse(localStorage.getItem("ai103-mock-state-v1")); },
+    rawStorage(key) { return localStorage.getItem(key); }
   };
 }
 
 test("AI-103 state ignores an existing AB-100 state", () => {
-  const app = bootApp({ current: 0, answers: {}, checked: {}, flags: {}, retryQueue: [] });
-  assert.equal(app.state().current, 0);
+  const abState = {
+    current: 0,
+    answers: { 99: ["B"] },
+    checked: { 99: true },
+    flags: { 99: true },
+    elapsed: 42,
+    paused: true,
+    mode: "exam",
+    retryQueue: []
+  };
+  const serializedAbState = JSON.stringify(abState);
+  const app = bootApp(undefined, { abState });
+
+  app.toggleFlag();
+
+  assert.deepEqual(app.state().answers, {});
+  assert.deepEqual(app.state().checked, {});
+  assert.deepEqual(app.state().flags, { 1: true });
+  assert.equal(app.state().mode, "practice");
+  assert.equal(app.rawStorage("ab100-mock-state-v1"), serializedAbState);
 });
 
 test("switching to retry mode and back preserves the wrong practice answer", () => {
