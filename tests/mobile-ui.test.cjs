@@ -88,10 +88,44 @@ test("small accent text has WCAG AA contrast in both themes", () => {
     );
   }
 
-  for (const selector of [".eyebrow", ".sidebar .eyebrow", ".question-number", ".source-link", ".answer-heading a"]) {
+  for (const selector of [".eyebrow", ".question-number", ".answer-heading a"]) {
     const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     assert.match(css, new RegExp(`${escaped}\\s*\\{[^}]*color:\\s*var\\(--accent-foreground\\)`));
   }
+});
+
+test("sidebar accent text has WCAG AA contrast in both themes", () => {
+  const dark = tokensFor(":root");
+  const light = tokensFor(':root[data-theme="light"]');
+
+  for (const tokens of [dark, light]) {
+    assert.match(tokens["--sidebar-accent-foreground"] || "", /^#[\da-f]{6}$/i);
+    assert.ok(
+      contrastRatio(tokens["--sidebar-accent-foreground"], tokens["--sidebar"]) >= 4.5,
+      "sidebar accent foreground must be >= 4.5:1 against the sidebar background"
+    );
+  }
+
+  for (const selector of [".sidebar .eyebrow", ".sidebar .text-button", ".sidebar .source-link"]) {
+    const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    assert.match(css, new RegExp(`${escaped}\\s*\\{[^}]*color:\\s*var\\(--sidebar-accent-foreground\\)`));
+  }
+});
+
+test("wrong navigation state has WCAG AA contrast in both themes", () => {
+  const dark = tokensFor(":root");
+  const light = tokensFor(':root[data-theme="light"]');
+
+  for (const tokens of [dark, light]) {
+    assert.match(tokens["--wrong-nav-fill"] || "", /^#[\da-f]{6}$/i);
+    assert.match(tokens["--wrong-nav-ink"] || "", /^#[\da-f]{6}$/i);
+    assert.ok(
+      contrastRatio(tokens["--wrong-nav-ink"], tokens["--wrong-nav-fill"]) >= 4.5,
+      "wrong navigation ink must be >= 4.5:1 against its fill"
+    );
+  }
+
+  assert.match(css, /\.nav-item\.wrong\s*\{[^}]*background:\s*var\(--wrong-nav-fill\)[^}]*border-color:\s*var\(--wrong-border\)[^}]*color:\s*var\(--wrong-nav-ink\)/);
 });
 
 test("Azure selection tokens are separate from correctness tokens", () => {

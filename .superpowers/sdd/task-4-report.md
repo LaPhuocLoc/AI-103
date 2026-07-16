@@ -141,3 +141,49 @@ Additional checks:
 ### Follow-up concerns
 
 - No new implementation concerns. `AB-100` remains only in intentional negative/collision test fixtures, as documented above.
+
+## Contrast re-review follow-up
+
+### Fixes
+
+- Added `--sidebar-accent-foreground: #8bcdf8` in both themes and routed `.sidebar .eyebrow`, `.sidebar .text-button`, and `.sidebar .source-link` through it.
+- The sidebar foreground measures 9.79:1 against the dark sidebar (`#0b2118`) and 6.98:1 against the light-theme sidebar (`#173d2f`).
+- Added distinct `--wrong-nav-fill` and `--wrong-nav-ink` tokens while retaining `--wrong-border` as the semantic red border.
+- Dark wrong navigation uses white on `#8f3f39` at 7.15:1; light wrong navigation uses white on `#9f362f` at 6.90:1.
+
+### Re-review RED evidence
+
+After adding the two actual foreground/background contrast contracts, before changing CSS, ran:
+
+```powershell
+node --test tests/mobile-ui.test.cjs
+```
+
+Result: 11 tests run, 9 passed, 2 failed.
+
+- `sidebar accent text has WCAG AA contrast in both themes` failed because the dedicated sidebar foreground token was absent.
+- `wrong navigation state has WCAG AA contrast in both themes` failed because the wrong-navigation fill/ink token pair was absent.
+
+### Re-review GREEN evidence
+
+Targeted command:
+
+```powershell
+node --test tests/mobile-ui.test.cjs
+```
+
+Result: 11 tests passed, 0 failed.
+
+Full repository command:
+
+```powershell
+node --test tests/*.test.cjs
+```
+
+Result: 21 tests passed, 0 failed.
+
+`git diff --check` also passed. No IDs, breakpoints, touch targets, drawer rules, or JavaScript behavior changed.
+
+### Re-review concerns
+
+- None. All four newly measured theme-specific contrast pairs exceed 4.5:1.
