@@ -1,5 +1,7 @@
 :root {
   color-scheme: dark;
+  --accent: #0078d4;
+  --accent-strong: #005a9e;
   --ink: #e3ebe6;
   --muted: #99a69f;
   --paper: #0e1411;
@@ -8,11 +10,11 @@
   --surface-soft: #121a16;
   --surface-hover: #243129;
   --line: #2d3933;
-  --green: #78bd98;
+  --green: var(--accent);
   --green-dark: #a4d9ba;
   --green-soft: #1c3427;
-  --button-green: #347f5b;
-  --button-green-hover: #2a684a;
+  --button-green: var(--accent);
+  --button-green-hover: var(--accent-strong);
   --nav-active-bg: #89b99f;
   --nav-active-ink: #10241a;
   --amber: #d7aa61;
@@ -36,11 +38,11 @@
   --surface-soft: #fbfcfa;
   --surface-hover: #f0f2ef;
   --line: #dfe3de;
-  --green: #176b4d;
-  --green-dark: #0f5139;
-  --green-soft: #e6f3ec;
-  --button-green: #176b4d;
-  --button-green-hover: #0f5139;
+  --green: var(--accent);
+  --green-dark: var(--accent-strong);
+  --green-soft: #e5f1fb;
+  --button-green: var(--accent);
+  --button-green-hover: var(--accent-strong);
   --nav-active-bg: #ffffff;
   --nav-active-ink: #0f5139;
   --amber: #d18b28;

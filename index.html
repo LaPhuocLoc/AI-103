@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AB-100 mock exam - 106 câu hỏi luyện thi từ tài liệu AB-100.">
-  <title>AB-100 Mock Exam</title>
+  <meta name="description" content="AI-103 mock exam - 107 câu hỏi luyện thi Azure AI Apps and Agents Developer Associate.">
+  <title>AI-103 Mock Exam</title>
   <script>
-    document.documentElement.dataset.theme = localStorage.getItem('ab100-theme') || 'dark';
+    document.documentElement.dataset.theme = localStorage.getItem('ai103-theme') || 'dark';
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,8 +18,8 @@
     <aside class="sidebar" id="sidebar">
       <button class="sidebar-close mobile-only" id="sidebarClose" type="button" aria-label="Đóng danh sách câu hỏi">×</button>
       <div class="brand">
-        <div class="brand-mark">AB</div>
-        <div><strong>AB-100</strong><span>Mock exam studio</span></div>
+        <div class="brand-mark">AI</div>
+        <div><strong>AI-103</strong><span>Mock exam studio</span></div>
       </div>
 
       <section class="side-card timer-card">
@@ -29,7 +29,7 @@
       </section>
 
       <section class="side-card progress-card">
-        <div class="progress-copy"><span>Tiến độ</span><strong id="progressText">0 / 106</strong></div>
+        <div class="progress-copy"><span>Tiến độ</span><strong id="progressText">0 / 107</strong></div>
         <div class="progress-track"><span id="progressBar"></span></div>
         <div class="score-row"><span>Đúng</span><strong id="scoreText">0 / 0</strong></div>
       </section>
@@ -48,7 +48,7 @@
         <button class="text-button" id="clearProgress">Làm lại</button>
       </div>
       <nav class="question-grid" id="questionGrid" aria-label="Danh sách câu hỏi"></nav>
-      <a class="source-link" href="AB-100.pdf" target="_blank" rel="noopener">Mở đề PDF gốc ↗</a>
+      <a class="source-link" href="AI-103.pdf" target="_blank" rel="noopener">Mở đề PDF gốc ↗</a>
     </aside>
     <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Đóng danh sách câu hỏi" tabindex="-1"></button>
 
@@ -57,7 +57,7 @@
         <button class="icon-button mobile-only" id="menuButton" aria-label="Mở danh sách câu hỏi">☰</button>
         <div>
           <span class="eyebrow">Microsoft certification practice</span>
-          <h1>Agentic AI Business Solutions Architect</h1>
+          <h1>Azure AI Apps and Agents Developer Associate</h1>
         </div>
         <div class="top-actions">
           <button class="secondary-button theme-button" id="themeToggle" aria-label="Đổi giao diện sáng tối">☀ Chế độ sáng</button>
@@ -93,7 +93,7 @@
         <section class="answer-card" id="answerCard" hidden>
           <div class="answer-heading">
             <div><span class="eyebrow">Đáp án & giải thích</span><h2 id="answerStatus">Đáp án đúng</h2></div>
-            <a id="pageLink" href="AB-100.pdf#page=2" target="_blank" rel="noopener">Trang nguồn ↗</a>
+            <a id="pageLink" href="AI-103.pdf#page=2" target="_blank" rel="noopener">Trang nguồn ↗</a>
           </div>
           <div class="correct-answer" id="correctAnswer"></div>
           <details class="explanation" open>
