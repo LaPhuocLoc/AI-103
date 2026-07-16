@@ -6,6 +6,38 @@ const html = fs.readFileSync(require.resolve("../index.html"), "utf8");
 const css = fs.readFileSync(require.resolve("../styles.css"), "utf8");
 const app = fs.readFileSync(require.resolve("../app.js"), "utf8");
 
+const REQUIRED_IDS = [
+  "sidebar", "sidebarClose", "timer", "timerToggle", "progressText", "progressBar",
+  "scoreText", "syncStatus", "exportProgress", "loadProgress", "clearProgress",
+  "questionGrid", "sidebarBackdrop", "menuButton", "themeToggle", "modeSelect",
+  "finishButton", "questionCard", "questionNumber", "typePill", "flagButton",
+  "questionStem", "choices", "manualNote", "prevButton", "checkButton", "nextButton",
+  "answerCard", "answerStatus", "pageLink", "correctAnswer", "explanationText",
+  "resultDialog", "dialogClose", "resultTitle", "resultScore", "resultCopy",
+  "reviewWrong", "continueButton",
+];
+
+function tokensFor(selector) {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const block = css.match(new RegExp(`${escaped}\\s*\\{([\\s\\S]*?)\\}`));
+  assert.ok(block, `missing ${selector} token block`);
+  return Object.fromEntries(
+    [...block[1].matchAll(/(--[\w-]+):\s*(#[\da-f]{6})/gi)].map((match) => [match[1], match[2]])
+  );
+}
+
+function relativeLuminance(hex) {
+  const channels = hex.slice(1).match(/.{2}/g).map((value) => parseInt(value, 16) / 255);
+  const linear = channels.map((value) => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+}
+
+function contrastRatio(first, second) {
+  const lighter = Math.max(relativeLuminance(first), relativeLuminance(second));
+  const darker = Math.min(relativeLuminance(first), relativeLuminance(second));
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 test("mobile sidebar exposes close and backdrop controls", () => {
   assert.match(html, /id="sidebarClose"/);
   assert.match(html, /id="sidebarBackdrop"/);
@@ -21,12 +53,72 @@ test("mobile breakpoint keeps the exam mode selector visible", () => {
 test("document is branded and linked for AI-103 only", () => {
   assert.match(html, /<title>AI-103 Mock Exam<\/title>/);
   assert.match(html, /Azure AI Apps and Agents Developer Associate/);
+  assert.match(html, /class="brand-mark">AI<\/div>\s*<div><strong>AI-103<\/strong>/);
+  assert.match(html, /id="progressText">0 \/ 107<\/strong>/);
+  assert.match(html, /localStorage\.getItem\('ai103-theme'\)/);
   assert.match(html, /href="AI-103\.pdf"/);
+  assert.match(html, /id="pageLink" href="AI-103\.pdf#page=2"/);
   assert.doesNotMatch(html, /AB-100/);
 });
 
-test("AI-103 Azure accent token is defined", () => {
+test("AI-103 Azure accent fill tokens are exact", () => {
   assert.match(css, /--accent:\s*#0078d4/);
+  assert.match(css, /--accent-strong:\s*#005a9e/);
+});
+
+test("document preserves the exact application DOM ID contract", () => {
+  const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
+  assert.deepEqual(ids, REQUIRED_IDS);
+});
+
+test("small accent text has WCAG AA contrast in both themes", () => {
+  const dark = tokensFor(":root");
+  const light = tokensFor(':root[data-theme="light"]');
+  assert.match(dark["--accent-foreground"] || "", /^#[\da-f]{6}$/i);
+  assert.match(light["--accent-foreground"] || "", /^#[\da-f]{6}$/i);
+
+  for (const surface of ["--paper", "--card", "--surface"]) {
+    assert.ok(
+      contrastRatio(dark["--accent-foreground"], dark[surface]) >= 4.5,
+      `dark accent foreground must be >= 4.5:1 against ${surface}`
+    );
+    assert.ok(
+      contrastRatio(light["--accent-foreground"], light[surface]) >= 4.5,
+      `light accent foreground must be >= 4.5:1 against ${surface}`
+    );
+  }
+
+  for (const selector of [".eyebrow", ".sidebar .eyebrow", ".question-number", ".source-link", ".answer-heading a"]) {
+    const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    assert.match(css, new RegExp(`${escaped}\\s*\\{[^}]*color:\\s*var\\(--accent-foreground\\)`));
+  }
+});
+
+test("Azure selection tokens are separate from correctness tokens", () => {
+  const dark = tokensFor(":root");
+  assert.ok(dark["--accent-soft"]);
+  assert.match(css, /--accent-glow:\s*rgba\(/);
+  assert.ok(dark["--correct-ink"]);
+  assert.ok(dark["--correct-border"]);
+  assert.ok(dark["--correct-soft"]);
+  assert.notEqual(dark["--accent-foreground"], dark["--correct-ink"]);
+
+  assert.match(css, /\.choice\.correct\s*\{[^}]*border-color:\s*var\(--correct-border\)[^}]*background:\s*var\(--correct-soft\)/);
+  assert.match(css, /\.match-option\.correct\s*\{[^}]*color:\s*var\(--correct-ink\)/);
+  assert.match(css, /\.drop-zone\.correct\s*\{[^}]*color:\s*var\(--correct-ink\)/);
+  assert.match(css, /\.nav-item\.correct\s*\{[^}]*var\(--correct-border\)/);
+  assert.match(css, /\.nav-item\.wrong\s*\{[^}]*var\(--wrong-border\)/);
+  assert.match(css, /\.correct-answer\s*\{[^}]*background:\s*var\(--correct-soft\)[^}]*color:\s*var\(--correct-ink\)/);
+});
+
+test("selected progress hover and drag states route through Azure tokens", () => {
+  assert.match(css, /\.progress-track span\s*\{[^}]*background:\s*var\(--accent\)/);
+  assert.match(css, /\.nav-item:hover, \.nav-item\.active\s*\{[^}]*background:\s*var\(--accent\)/);
+  assert.match(css, /\.choice\.selected\s*\{[^}]*border-color:\s*var\(--accent\)[^}]*background:\s*var\(--accent-soft\)/);
+  assert.match(css, /\.match-option\.selected\s*\{[^}]*border-color:\s*var\(--accent\)[^}]*background:\s*var\(--accent-soft\)/);
+  assert.match(css, /\.drag-chip\.active, \.drag-chip\.dragging\s*\{[^}]*box-shadow:\s*0 0 0 2px var\(--accent-glow\)/);
+  assert.match(css, /\.drop-zone:hover, \.drop-zone\.drag-over\s*\{[^}]*border-color:\s*var\(--accent\)[^}]*background:\s*var\(--accent-soft\)/);
+  assert.doesNotMatch(css, /var\(--green(?:-dark|-soft)?\)|#8fd4ad|#9bb7a8|rgba\(120,\s*189,\s*152/);
 });
 
 test("user-facing Vietnamese HTML copy is valid UTF-8", () => {

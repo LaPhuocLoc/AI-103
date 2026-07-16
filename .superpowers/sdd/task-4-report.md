@@ -84,3 +84,60 @@ Additional audits:
 
 - `AB-100` remains in test-only negative/collision fixtures (`question-data.test.cjs`, `retry-mode.test.cjs`, and the new branding rejection assertion). These references intentionally protect AI-103 state and branding isolation and are not user-visible or runtime literals.
 - The pre-existing semantic variable names such as `--green` were retained as compatibility aliases to minimize CSS churn; their primary accent value now resolves to Azure blue.
+
+## Quality-review follow-up: accessible and semantic Azure tokens
+
+### Review fixes
+
+- Kept the exact fill/action colors `--accent: #0078d4` and `--accent-strong: #005a9e`.
+- Added `--accent-foreground: #6cb8f2` for dark-theme small text. Its measured contrast is 8.68:1 on `--paper`, 7.85:1 on `--card`, and 7.27:1 on `--surface`.
+- Added a light-theme `--accent-foreground: #005a9e`, measuring 6.50:1 on `--paper` and 7.10:1 on white card/surface backgrounds.
+- Routed eyebrows, question numbers, source links, answer source links, and sidebar accent text through the accessible foreground token.
+- Added independent `--correct-*` and `--wrong-*` token families. Correct choices, matching options, drop zones, navigation states, and the answer panel remain green; wrong states remain red.
+- Routed selected/active choices, matching options, progress, navigation, hover borders, drag chips/ghosts/glow, drop targets, and primary buttons through `--accent`, `--accent-strong`, `--accent-soft`, or `--accent-glow`.
+- Removed the legacy `--green*`/`--button-green*` aliases and hard-coded green selection artifacts. The earlier concern about compatibility alias names is therefore resolved.
+
+### Follow-up RED evidence
+
+After strengthening `tests/mobile-ui.test.cjs`, before changing CSS, ran:
+
+```powershell
+node --test tests/mobile-ui.test.cjs
+```
+
+Result: 9 tests run, 6 passed, 3 failed.
+
+- `small accent text has WCAG AA contrast in both themes` failed because `--accent-foreground` did not exist.
+- `Azure selection tokens are separate from correctness tokens` failed because `--accent-soft`, `--accent-glow`, and explicit `--correct-*` tokens did not exist.
+- `selected progress hover and drag states route through Azure tokens` failed because progress and several hover/selection/drag rules still used legacy hard-coded green values or `--green*` aliases.
+
+The strengthened AI-103 metadata, exact Azure fill tokens, both PDF links, theme key, brand mark/name, default count, exact DOM ID list, UTF-8 copy, drawer controls, and breakpoint tests passed during RED.
+
+### Follow-up GREEN evidence
+
+Targeted command:
+
+```powershell
+node --test tests/mobile-ui.test.cjs
+```
+
+Result: 9 tests passed, 0 failed.
+
+Full repository command:
+
+```powershell
+node --test tests/*.test.cjs
+```
+
+Result: 19 tests passed, 0 failed.
+
+Additional checks:
+
+- `git diff --check` passed.
+- The exact 39-element DOM ID contract passes in the test suite.
+- `rg` found no `var(--green*)`, `#8fd4ad`, `#9bb7a8`, legacy green drag glow, or legacy answered-green selection artifacts in `styles.css`.
+- The `900px` and `620px` media queries and all drawer/touch behavior rules are unchanged.
+
+### Follow-up concerns
+
+- No new implementation concerns. `AB-100` remains only in intentional negative/collision test fixtures, as documented above.
