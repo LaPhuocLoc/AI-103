@@ -7,17 +7,17 @@ import pdfplumber
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = Path(r"C:\Users\Admin\Downloads\AB-100.pdf")
-PUBLIC_PDF = ROOT / "AB-100.pdf"
+SOURCE = Path(r"C:\Users\Admin\Downloads\Certs\pdf\AI-103.pdf")
+PUBLIC_PDF = ROOT / "AI-103.pdf"
 OUTPUT = ROOT / "questions.js"
-
-HEADER = "AB-100: Agentic AI Business Solutions Architect - Practice Questions and Answers"
+HEADER = "AI-103: Azure AI Apps and Agents Developer Associate - Practice Questions and Answers"
 FOOTER = "Cloud and AI Hub"
+EXPECTED_IDS = list(range(1, 108))
 
 
 def clean(text: str) -> str:
     text = text.replace(HEADER, "").replace(FOOTER, "")
-    text = text.replace("\u2022", "•").replace("\u2019", "'")
+    text = text.replace("\u2022", "â€¢").replace("\u2019", "'")
     text = re.sub(r"[ \t]+\n", "\n", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
@@ -68,67 +68,58 @@ def correct_answer_summary(answer: str, explanation: str) -> str:
     return first_line or "Xem phần giải thích chi tiết bên dưới."
 
 
-def main():
-    if not SOURCE.exists():
-        raise FileNotFoundError(SOURCE)
-
+def extract_questions(source: Path) -> list[dict]:
     page_texts = []
-    with pdfplumber.open(SOURCE) as pdf:
+    with pdfplumber.open(source) as pdf:
         for page_number, page in enumerate(pdf.pages, 1):
             page_texts.append((page_number, clean(page.extract_text() or "")))
 
     full_text = "\n".join(text for _, text in page_texts)
     matches = list(re.finditer(r"(?m)^Q(\d+)\.\s+", full_text))
-    questions = []
-
     page_offsets = []
     cursor = 0
     for page_number, text in page_texts:
         page_offsets.append((cursor, cursor + len(text), page_number))
         cursor += len(text) + 1
 
-    for idx, match in enumerate(matches):
+    questions = []
+    for index, match in enumerate(matches):
         number = int(match.group(1))
-        end = matches[idx + 1].start() if idx + 1 < len(matches) else len(full_text)
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(full_text)
         block = full_text[match.end():end].strip()
         question_part, answer_part = (block.split("Answer:", 1) + [""])[:2]
         raw_answer, explanation = (answer_part.split("Explanation:", 1) + [""])[:2]
-        question_part = question_part.strip()
-        raw_answer = raw_answer.strip()
-        explanation = explanation.strip()
-        choices, stem = parse_choices(question_part)
-        letters = answer_letters(raw_answer, choices)
-
+        choices, stem = parse_choices(question_part.strip())
+        letters = answer_letters(raw_answer.strip(), choices)
         start_page = next(
             (page for start, finish, page in page_offsets if start <= match.start() <= finish),
             1,
         )
-        end_position = max(match.start(), end - 1)
         end_page = next(
-            (page for start, finish, page in page_offsets if start <= end_position <= finish),
+            (page for start, finish, page in page_offsets if start <= max(match.start(), end - 1) <= finish),
             start_page,
         )
+        questions.append({
+            "id": number,
+            "stem": stem,
+            "rawQuestion": question_part.strip(),
+            "choices": choices,
+            "correct": letters,
+            "answer": correct_answer_summary(raw_answer.strip(), explanation.strip()),
+            "explanation": explanation.strip(),
+            "sourcePages": list(range(start_page, end_page + 1)),
+            "gradable": bool(choices and letters),
+            "multiple": len(letters) > 1,
+        })
+    return questions
 
-        questions.append(
-            {
-                "id": number,
-                "stem": stem,
-                "rawQuestion": question_part,
-                "choices": choices,
-                "correct": letters,
-                "answer": correct_answer_summary(raw_answer, explanation),
-                "explanation": explanation,
-                "sourcePages": list(range(start_page, end_page + 1)),
-                "gradable": bool(choices and letters),
-                "multiple": len(letters) > 1,
-            }
-        )
 
-    if [q["id"] for q in questions] != list(range(1, len(questions) + 1)):
-        raise ValueError("Question numbering is not continuous")
-
+def main():
+    questions = extract_questions(SOURCE)
+    if [q["id"] for q in questions] != EXPECTED_IDS:
+        raise ValueError("Expected continuous AI-103 question IDs 1-107")
     OUTPUT.write_text(
-        "window.AB100_QUESTIONS = "
+        "window.AI103_QUESTIONS = "
         + json.dumps(questions, ensure_ascii=False, separators=(",", ":"))
         + ";\n",
         encoding="utf-8",
