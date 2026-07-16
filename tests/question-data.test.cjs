@@ -46,3 +46,11 @@ test("every question can be graded or explicitly reviewed manually", () => {
     assert.ok(question.gradable || AI103_MATCHING[question.id] || question.answer || question.explanation);
   }
 });
+
+test("application consumes only AI-103 browser globals and keys", () => {
+  const app = fs.readFileSync(require.resolve("../app.js"), "utf8");
+  assert.match(app, /AI103_QUESTIONS/);
+  assert.match(app, /AI103_MATCHING/);
+  assert.match(app, /ai103-mock-state-v1/);
+  assert.doesNotMatch(app, /AB100_|ab100-mock-state/);
+});

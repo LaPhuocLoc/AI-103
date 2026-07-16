@@ -1,8 +1,11 @@
 (() => {
-  const questions = window.AB100_QUESTIONS || [];
-  const matchingData = window.AB100_MATCHING || {};
-  const dragQuestionIds = new Set([8, 12, 26, 36, 46, 56, 66, 76, 86, 102, 104]);
-  const STORAGE_KEY = "ab100-mock-state-v1";
+  const questions = window.AI103_QUESTIONS || [];
+  const matchingData = window.AI103_MATCHING || {};
+  const dragQuestionIds = new Set(window.AI103_DRAG_IDS || []);
+  const STORAGE_KEY = "ai103-mock-state-v1";
+  const THEME_KEY = "ai103-theme";
+  const PDF_FILE = "AI-103.pdf";
+  const STATE_FILE = "ai103-progress-state.json";
   const $ = (id) => document.getElementById(id);
   const els = {
     grid: $("questionGrid"), number: $("questionNumber"), type: $("typePill"), stem: $("questionStem"),
@@ -37,7 +40,7 @@
 
   function applyTheme(theme) {
     document.documentElement.dataset.theme = theme;
-    localStorage.setItem("ab100-theme", theme);
+    localStorage.setItem(THEME_KEY, theme);
     els.theme.textContent = theme === "dark" ? "☀ Chế độ sáng" : "☾ Chế độ tối";
     els.theme.title = theme === "dark" ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối";
   }
@@ -77,18 +80,18 @@
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "progress-state.json";
+    link.download = STATE_FILE;
     document.body.appendChild(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
-    setSyncStatus("Đã xuất progress-state.json — thay file trong repo rồi commit.");
+    setSyncStatus(`Đã xuất ${STATE_FILE} — thay file trong repo rồi commit.`);
   }
   async function loadCommittedProgress({ force = false } = {}) {
-    if (force && !confirm("Nạp progress-state.json từ Git và ghi đè state trên thiết bị này?")) return;
-    setSyncStatus("Đang nạp progress-state.json…");
+    if (force && !confirm(`Nạp ${STATE_FILE} từ Git và ghi đè state trên thiết bị này?`)) return;
+    setSyncStatus(`Đang nạp ${STATE_FILE}…`);
     try {
-      const response = await fetch(`progress-state.json?v=${Date.now()}`, { cache: "no-store" });
+      const response = await fetch(`${STATE_FILE}?v=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const payload = await response.json();
       state = normalizeState(payload?.state || payload);
@@ -404,7 +407,7 @@
     els.correctAnswer.textContent = groups ? groups.map((group, index) => `${index + 1}. ${group.prompt}: ${group.correct}`).join("\n") : q.answer;
     els.explanation.textContent = q.explanation || "Không có giải thích bổ sung trong tài liệu.";
     const page = q.sourcePages[0] || 1;
-    els.pageLink.href = `AB-100.pdf#page=${page}`;
+    els.pageLink.href = `${PDF_FILE}#page=${page}`;
     els.pageLink.textContent = `Trang ${q.sourcePages.join("–")} ↗`;
     if (reveal) setTimeout(() => els.answerCard.scrollIntoView({ behavior: "smooth", block: "nearest" }), 30);
   }

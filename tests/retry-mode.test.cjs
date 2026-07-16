@@ -36,8 +36,9 @@ function bootApp(initialState) {
   ];
   const elements = new Map(ids.map((id) => [id, new ElementStub(id)]));
   const storage = new Map([
-    ["ab100-mock-state-v1", JSON.stringify(initialState)],
-    ["ab100-theme", "dark"]
+    ["ai103-mock-state-v1", JSON.stringify(initialState)],
+    ["ai103-theme", "dark"],
+    ["ab100-mock-state-v1", JSON.stringify({ current: 99 })]
   ]);
   const localStorage = {
     getItem(key) { return storage.has(key) ? storage.get(key) : null; },
@@ -53,7 +54,7 @@ function bootApp(initialState) {
     elementFromPoint() { return null; }
   };
   const window = {
-    AB100_QUESTIONS: [{
+    AI103_QUESTIONS: [{
       id: 1,
       stem: "Question",
       choices: [{ label: "A", text: "Wrong" }, { label: "B", text: "Correct" }],
@@ -64,7 +65,8 @@ function bootApp(initialState) {
       gradable: true,
       multiple: false
     }],
-    AB100_MATCHING: {},
+    AI103_MATCHING: {},
+    AI103_DRAG_IDS: [],
     scrollTo() {}
   };
   const context = vm.createContext({
@@ -87,9 +89,14 @@ function bootApp(initialState) {
       select.listeners.change();
     },
     text(id) { return elements.get(id).textContent; },
-    state() { return JSON.parse(localStorage.getItem("ab100-mock-state-v1")); }
+    state() { return JSON.parse(localStorage.getItem("ai103-mock-state-v1")); }
   };
 }
+
+test("AI-103 state ignores an existing AB-100 state", () => {
+  const app = bootApp({ current: 0, answers: {}, checked: {}, flags: {}, retryQueue: [] });
+  assert.equal(app.state().current, 0);
+});
 
 test("switching to retry mode and back preserves the wrong practice answer", () => {
   const app = bootApp({
