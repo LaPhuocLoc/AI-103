@@ -167,6 +167,16 @@ select { min-width: 130px; padding: 9px 34px 9px 12px; border: 1px solid var(--l
 .case-context[hidden] { display: none; }
 .question-stem { margin: 26px 0; font-size: 17px; white-space: pre-wrap; }
 .question-stem::first-line { font-weight: 600; }
+.question-supplement { margin: -8px 0 24px; }
+.question-supplement[hidden] { display: none; }
+.source-table-wrap { max-width: 100%; overflow-x: auto; border: 1px solid var(--line); border-radius: 13px; }
+.source-table { width: 100%; min-width: 560px; border-collapse: collapse; background: var(--surface-soft); font-size: 14px; }
+.source-table th, .source-table td { padding: 11px 13px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.source-table th { background: var(--accent); color: #fff; font: 800 13px Manrope; }
+.source-table th:last-child, .source-table td:last-child { border-right: 0; }
+.source-table tbody tr:last-child td { border-bottom: 0; }
+.source-table td:first-child { font-weight: 800; white-space: nowrap; }
+.source-code { max-width: 100%; margin: 0; padding: 17px 18px; overflow-x: auto; border: 1px solid var(--line); border-radius: 13px; background: var(--surface-soft); color: var(--ink); font: 500 13px/1.6 Consolas, "Cascadia Code", monospace; tab-size: 2; }
 .tip-panel { margin: -8px 0 24px; padding: 19px 20px; background: var(--tip-surface); border: 1px solid var(--tip-border); border-radius: 14px; color: var(--tip-foreground); }
 .tip-panel[hidden] { display: none; }
 .tip-row { display: flex; gap: 7px; align-items: baseline; }
@@ -280,6 +290,8 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   .question-meta { align-items: flex-start; }
   .question-tools { flex-direction: column; align-items: flex-end; gap: 5px; }
   .question-stem { font-size: 15px; }
+  .source-table { min-width: 480px; }
+  .source-code { padding: 14px; font-size: 12px; }
   .question-actions { grid-template-columns: 1fr 1fr; }
   #checkButton { grid-column: 1 / -1; grid-row: 1; }
   .dialog-actions { flex-direction: column; }

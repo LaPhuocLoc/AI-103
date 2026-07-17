@@ -4,6 +4,7 @@
   const dragQuestionIds = new Set(window.AI103_DRAG_IDS || []);
   const tips = window.AI103_TIPS || {};
   const caseContexts = window.AI103_CASE_CONTEXT || {};
+  const questionSupplements = window.AI103_QUESTION_SUPPLEMENTS || {};
   const STORAGE_KEY = "ai103-mock-state-v1";
   const THEME_KEY = "ai103-theme";
   const PDF_FILE = "AI-103.pdf";
@@ -11,6 +12,7 @@
   const $ = (id) => document.getElementById(id);
   const els = {
     grid: $("questionGrid"), number: $("questionNumber"), type: $("typePill"), caseContext: $("caseContext"), stem: $("questionStem"),
+    supplement: $("questionSupplement"),
     choices: $("choices"), manual: $("manualNote"), answerCard: $("answerCard"), answerStatus: $("answerStatus"),
     correctAnswer: $("correctAnswer"), explanation: $("explanationText"), pageLink: $("pageLink"),
     prev: $("prevButton"), next: $("nextButton"), check: $("checkButton"), flag: $("flagButton"), tip: $("tipButton"),
@@ -244,6 +246,7 @@
     els.caseContext.hidden = !caseContext;
     els.caseContext.textContent = caseContext || "";
     els.stem.textContent = q.stem || q.rawQuestion;
+    renderQuestionSupplement(q);
     els.choices.innerHTML = "";
     els.choices.classList.toggle("matching-groups", Boolean(groups));
     els.choices.classList.toggle("drag-board", dragMode);
@@ -274,6 +277,53 @@
     renderAnswer(reveal);
     updateStats();
     renderNav();
+  }
+
+  function renderQuestionSupplement(q) {
+    const supplement = questionSupplements[q.id];
+    els.supplement.innerHTML = "";
+    els.supplement.hidden = !supplement;
+    if (!supplement) return;
+    els.supplement.setAttribute("aria-label", supplement.label || `Nội dung bổ sung câu ${q.id}`);
+
+    if (supplement.type === "table") {
+      const wrap = document.createElement("div");
+      wrap.className = "source-table-wrap";
+      const table = document.createElement("table");
+      table.className = "source-table";
+      const head = document.createElement("thead");
+      const headRow = document.createElement("tr");
+      supplement.headers.forEach((value) => {
+        const cell = document.createElement("th");
+        cell.scope = "col";
+        cell.textContent = value;
+        headRow.appendChild(cell);
+      });
+      head.appendChild(headRow);
+      const body = document.createElement("tbody");
+      supplement.rows.forEach((values) => {
+        const row = document.createElement("tr");
+        values.forEach((value) => {
+          const cell = document.createElement("td");
+          cell.textContent = value;
+          row.appendChild(cell);
+        });
+        body.appendChild(row);
+      });
+      table.append(head, body);
+      wrap.appendChild(table);
+      els.supplement.appendChild(wrap);
+      return;
+    }
+
+    if (supplement.type === "code") {
+      const pre = document.createElement("pre");
+      pre.className = "source-code";
+      const code = document.createElement("code");
+      code.textContent = supplement.content;
+      pre.appendChild(code);
+      els.supplement.appendChild(pre);
+    }
   }
 
   function tipIsAvailable() {

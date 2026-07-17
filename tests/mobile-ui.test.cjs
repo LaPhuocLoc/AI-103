@@ -11,7 +11,7 @@ const REQUIRED_IDS = [
   "scoreText", "syncStatus", "exportProgress", "loadProgress", "clearProgress",
   "questionGrid", "sidebarBackdrop", "menuButton", "themeToggle", "modeSelect",
   "finishButton", "questionCard", "questionNumber", "typePill", "tipButton", "flagButton",
-  "caseContext", "questionStem", "tipPanel", "tipKeywords", "tipAnswer", "tipMnemonic", "tipTraps",
+  "caseContext", "questionStem", "questionSupplement", "tipPanel", "tipKeywords", "tipAnswer", "tipMnemonic", "tipTraps",
   "tipUltraShort", "choices", "manualNote", "prevButton", "checkButton", "nextButton",
   "answerCard", "answerStatus", "pageLink", "correctAnswer", "explanationText",
   "resultDialog", "dialogClose", "resultTitle", "resultScore", "resultCopy",
@@ -87,7 +87,7 @@ test("question card exposes an accessible tip control and structured tip panel",
   assert.match(html, /<script src="tips-batches\/tips-1-36\.js\?v=2"><\/script>/);
   assert.match(html, /<script src="tips-batches\/tips-37-72\.js\?v=2"><\/script>/);
   assert.match(html, /<script src="tips-batches\/tips-73-107\.js\?v=2"><\/script>/);
-  assert.match(html, /<script src="tips\.js\?v=2"><\/script>\s*<script src="app\.js\?v=6"><\/script>/);
+  assert.match(html, /<script src="tips\.js\?v=2"><\/script>\s*<script src="app\.js\?v=7"><\/script>/);
 });
 
 test("question card can display restored case-study context before the stem", () => {
@@ -124,7 +124,7 @@ test("tip components use the exact cool Azure blue palette", () => {
       "--tip-muted": "#315f78"
     }
   );
-  assert.match(html, /styles\.css\?v=6/);
+  assert.match(html, /styles\.css\?v=7/);
 });
 
 test("small accent text has WCAG AA contrast in both themes", () => {

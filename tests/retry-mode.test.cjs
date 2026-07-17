@@ -43,10 +43,10 @@ class ElementStub {
 }
 
 function bootApp(initialState, {
-  abState = { current: 99 }, committedPayload, questions, matchingData = {}, dragIds = []
+  abState = { current: 99 }, committedPayload, questions, matchingData = {}, dragIds = [], supplements = {}
 } = {}) {
   const ids = [
-    "questionGrid", "questionNumber", "typePill", "caseContext", "questionStem", "choices", "manualNote",
+    "questionGrid", "questionNumber", "typePill", "caseContext", "questionStem", "questionSupplement", "choices", "manualNote",
     "answerCard", "answerStatus", "correctAnswer", "explanationText", "pageLink", "prevButton",
     "nextButton", "checkButton", "flagButton", "tipButton", "tipPanel", "tipKeywords", "tipAnswer",
     "tipMnemonic", "tipTraps", "tipUltraShort", "progressText", "progressBar", "scoreText", "timer",
@@ -100,6 +100,7 @@ function bootApp(initialState, {
     AI103_QUESTIONS: questions || defaultQuestions,
     AI103_MATCHING: matchingData,
     AI103_DRAG_IDS: dragIds,
+    AI103_QUESTION_SUPPLEMENTS: supplements,
     AI103_TIPS: Object.fromEntries((questions || defaultQuestions).map((question) => [question.id, {
       keywords: `keyword ${question.id}`,
       answer: question.answer || "answer",
