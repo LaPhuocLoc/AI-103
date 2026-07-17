@@ -6,10 +6,33 @@ const vm = require("node:vm");
 function loadData() {
   const window = {};
   const context = vm.createContext({ window });
-  for (const file of ["questions.js", "matching-data.js", "tips.js"]) {
+  for (const file of [
+    "questions.js", "matching-data.js", "tips-batches/tips-1-36.js",
+    "tips-batches/tips-37-72.js", "tips-batches/tips-73-107.js", "tips.js"
+  ]) {
     vm.runInContext(fs.readFileSync(require.resolve(`../${file}`), "utf8"), context);
   }
   return window;
+}
+
+function assertGuideShape(question, guide, matching) {
+  assert.equal(typeof guide, "object", `Q${question.id} missing authored guide`);
+  for (const field of ["keywords", "mnemonic", "ultraShort"]) {
+    assert.ok(guide[field]?.trim(), `Q${question.id} missing authored ${field}`);
+  }
+  assert.equal(typeof guide.trapNotes, "object", `Q${question.id} missing authored trapNotes`);
+  assert.ok(Array.isArray(guide.sources) && guide.sources.length > 0, `Q${question.id} missing sources`);
+  for (const source of guide.sources) {
+    assert.match(source, /^https:\/\/learn\.microsoft\.com\//, `Q${question.id} source must be Microsoft Learn`);
+  }
+  const expectedKeys = question.choices.length
+    ? question.choices.map((choice) => choice.label)
+    : matching[question.id].map((group) => group.prompt);
+  assert.deepEqual(Object.keys(guide.trapNotes), expectedKeys, `Q${question.id} trapNotes keys`);
+  for (const key of expectedKeys) {
+    assert.ok(guide.trapNotes[key]?.trim().length >= 25, `Q${question.id} trap note ${key} is too shallow`);
+  }
+  assert.ok(guide.ultraShort.length <= 180, `Q${question.id} ultraShort is not short`);
 }
 
 function assertTipShape(id, tip) {
@@ -81,4 +104,11 @@ test("multi-line source explanations stay intact in choice traps", () => {
   const { AI103_TIPS } = loadData();
   assert.match(AI103_TIPS[1].traps.find((trap) => trap.label === "B").text, /live transcripts, not translations/);
   assert.match(AI103_TIPS[1].traps.find((trap) => trap.label === "D").text, /ideal for live scenarios/);
+});
+
+test("all 107 tips use fully authored Vietnamese learning guides", () => {
+  const { AI103_QUESTIONS, AI103_MATCHING, AI103_TIP_GUIDES } = loadData();
+  assert.equal(typeof AI103_TIP_GUIDES, "object", "authored guide catalog is missing");
+  assert.deepEqual(Object.keys(AI103_TIP_GUIDES).map(Number), Array.from({ length: 107 }, (_, index) => index + 1));
+  for (const question of AI103_QUESTIONS) assertGuideShape(question, AI103_TIP_GUIDES[question.id], AI103_MATCHING);
 });

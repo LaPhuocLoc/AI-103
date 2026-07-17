@@ -1,5 +1,5 @@
 (() => {
-  const guides = {
+  const legacyGuides = {
     1: ["streaming audio + transcript trong vài giây + live call", "Có luồng âm thanh trực tiếp và cần chữ ngay -> real-time speech to text."],
     2: ["PDF scan + giữ layout + tables + QR code + không cần LLM", "Thấy bố cục, bảng, section hoặc QR/barcode -> chọn Layout."],
     3: ["screenshot chứa chỉ dẫn độc hại + prompt injection + third-party content", "Muốn chặn tấn công thì Block; muốn hạ độ tin cậy nội dung ngoài thì Spotlighting."],
@@ -109,6 +109,9 @@
     107: ["enterprise vector/hybrid retrieval", "Kho tìm kiếm tập trung cho RAG -> Azure AI Search."]
   };
 
+  const guides = window.AI103_TIP_GUIDES || {};
+  window.AI103_TIP_GUIDES = guides;
+
   const questions = window.AI103_QUESTIONS || [];
   const matching = window.AI103_MATCHING || {};
 
@@ -156,15 +159,20 @@
   const tips = {};
   for (const question of questions) {
     const guide = guides[question.id];
-    if (!guide) continue;
-    const [keywords, mnemonic] = guide;
+    const legacyGuide = legacyGuides[question.id];
+    if (!guide && !legacyGuide) continue;
+    const keywords = guide?.keywords || legacyGuide[0];
+    const mnemonic = guide?.mnemonic || legacyGuide[1];
     const answer = answerFor(question);
     tips[question.id] = {
       keywords,
       answer,
       mnemonic,
-      traps: trapsFor(question, mnemonic),
-      ultraShort: `${keywords} → ${compact(answer, 180)}`
+      traps: guide?.trapNotes
+        ? Object.entries(guide.trapNotes).map(([label, text]) => ({ label, text }))
+        : trapsFor(question, mnemonic),
+      ultraShort: guide?.ultraShort || `${keywords} → ${compact(answer, 180)}`,
+      sources: guide?.sources || []
     };
   }
 
