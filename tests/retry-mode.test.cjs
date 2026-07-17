@@ -315,6 +315,11 @@ test("exam mode conceals score and correctness until submission, then enables re
   assert.equal(app.state().examSubmitted, true);
   assert.equal(app.text("scoreText"), "0 / 1");
   assert.equal(app.element("questionGrid").children[0].classNames.has("wrong"), true);
+  const standardChoices = app.element("choices").children;
+  assert.equal(standardChoices[0].classNames.has("wrong"), true);
+  assert.equal(standardChoices[1].classNames.has("correct"), true);
+  assert.equal(standardChoices[0].disabled, true);
+  assert.equal(standardChoices[1].disabled, true);
   app.reviewWrong();
   assert.equal(app.element("answerCard").hidden, false);
   assert.match(app.text("correctAnswer"), /B/);
@@ -333,6 +338,50 @@ test("exam submission reveals matching grading only after submission", () => {
   app.finish();
   assert.equal(app.text("scoreText"), "0 / 1");
   assert.equal(app.element("answerCard").hidden, false);
+  const matchingOptions = app.element("choices").children[0].children[1].children;
+  assert.equal(matchingOptions[0].classNames.has("wrong"), true);
+  assert.equal(matchingOptions[1].classNames.has("correct"), true);
+  assert.equal(matchingOptions[0].disabled, true);
+  assert.equal(matchingOptions[1].disabled, true);
+});
+
+test("submitted exam scores all gradable questions and marks unanswered as incomplete", () => {
+  const questions = [
+    { id: 1, stem: "One", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
+    { id: 2, stem: "Two", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false }
+  ];
+  const app = bootApp({
+    current: 0, answers: { 1: ["B"] }, checked: {}, flags: {}, elapsed: 0, paused: false,
+    mode: "exam", retryQueue: [], retryAnswers: {}, retryChecked: {}
+  }, { questions });
+
+  app.finish();
+
+  assert.equal(app.text("scoreText"), "1 / 2");
+  assert.equal(app.text("resultScore"), "50%");
+  const unansweredNav = app.element("questionGrid").children[1];
+  assert.equal(unansweredNav.classNames.has("wrong"), false);
+  assert.equal(unansweredNav.classNames.has("incomplete"), true);
+  assert.match(unansweredNav.getAttribute("aria-label"), /chưa trả lời/);
+  assert.doesNotMatch(unansweredNav.getAttribute("aria-label"), /sai/);
+  assert.match(unansweredNav.children[0].textContent, /○/);
+});
+
+test("submitted retry scores all gradable questions in retry scope", () => {
+  const questions = [
+    { id: 1, stem: "One", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
+    { id: 2, stem: "Two", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false }
+  ];
+  const app = bootApp({
+    current: 0, answers: {}, checked: {}, flags: {}, elapsed: 0, paused: false, mode: "retry",
+    retryQueue: [1, 2], retryAnswers: { 1: ["B"] }, retryChecked: {}
+  }, { questions });
+
+  app.finish();
+
+  assert.equal(app.text("scoreText"), "1 / 2");
+  assert.equal(app.text("resultScore"), "50%");
+  assert.match(app.text("resultCopy"), /Đúng 1\/2 câu có thể chấm tự động/);
 });
 
 test("fresh retry includes incorrect, incomplete, and flagged questions", () => {

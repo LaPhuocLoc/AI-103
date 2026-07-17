@@ -53,6 +53,7 @@ test("mobile breakpoint keeps the exam mode selector visible", () => {
 test("question navigation includes visible state-marker styling", () => {
   assert.match(css, /\.nav-state-marker/);
   assert.match(css, /\.nav-item\.active[^}]*outline/);
+  assert.match(css, /\.nav-item\.incomplete[^}]*border-style:\s*dashed/);
 });
 
 test("document is branded and linked for AI-103 only", () => {

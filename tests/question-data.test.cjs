@@ -89,6 +89,7 @@ test("repository documentation and portable state are AI-103-specific", () => {
     elapsed: 0,
     paused: false,
     mode: "practice",
+    examSubmitted: false,
     retryQueue: [],
     retryAnswers: {},
     retryChecked: {}

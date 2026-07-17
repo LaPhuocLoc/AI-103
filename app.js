@@ -39,6 +39,7 @@
   let lastTick = Date.now();
   let activeDragOption = null;
   let pointerDragState = null;
+  let retrySubmitted = false;
 
   function applyTheme(theme) {
     document.documentElement.dataset.theme = theme;
@@ -185,7 +186,8 @@
       const isAnswered = answered(q);
       const correctnessVisible = isGradable(q) && (state.mode === "exam" ? state.examSubmitted : checked[q.id]);
       const isRight = correctnessVisible && isAnswered && isCorrect(q);
-      const isWrong = correctnessVisible && !isRight;
+      const isWrong = correctnessVisible && isAnswered && !isRight;
+      const isIncomplete = correctnessVisible && !isAnswered;
       const isFlagged = Boolean(state.flags[q.id]);
       if (isActive) {
         button.classList.add("active");
@@ -194,6 +196,7 @@
       if (isAnswered) button.classList.add("answered");
       if (isRight) button.classList.add("correct");
       if (isWrong) button.classList.add("wrong");
+      if (isIncomplete) button.classList.add("incomplete");
       if (isFlagged) button.classList.add("flagged");
       const states = [isActive && "hiện tại", isAnswered ? "đã trả lời" : "chưa trả lời",
         isRight && "đúng", isWrong && "sai", isFlagged && "đã đánh dấu"].filter(Boolean);
@@ -201,7 +204,7 @@
       const marker = document.createElement("span");
       marker.className = "nav-state-marker";
       marker.setAttribute("aria-hidden", "true");
-      marker.textContent = [isActive && "›", isAnswered && "●", isRight && "✓", isWrong && "×", isFlagged && "★"].filter(Boolean).join("");
+      marker.textContent = [isActive && "›", isAnswered && "●", isRight && "✓", isWrong && "×", isIncomplete && "○", isFlagged && "★"].filter(Boolean).join("");
       button.appendChild(marker);
       button.addEventListener("click", () => goTo(index));
       els.grid.appendChild(button);
@@ -540,6 +543,7 @@
   }
 
   function enterRetryMode() {
+    retrySubmitted = false;
     const previousMode = state.mode;
     const existingQueue = Array.isArray(state.retryQueue) ? state.retryQueue : [];
     const retryAnswers = state.retryAnswers || (state.retryAnswers = {});
@@ -582,6 +586,7 @@
       return;
     }
     if (mode === "exam" && state.mode !== "exam") state.examSubmitted = false;
+    retrySubmitted = false;
     state.mode = mode;
     els.mode.value = mode;
     saveState();
@@ -591,26 +596,33 @@
   function updateStats() {
     const scope = scopedQuestions();
     const done = scope.filter((q) => answered(q)).length;
-    const graded = scope.filter((q) => isGradable(q) && answered(q));
-    const correct = graded.filter((q) => isCorrect(q)).length;
+    const submitted = (state.mode === "exam" && state.examSubmitted) || (state.mode === "retry" && retrySubmitted);
+    const graded = scope.filter((q) => isGradable(q) && (submitted || answered(q)));
+    const correct = graded.filter((q) => answered(q) && isCorrect(q)).length;
     els.progressText.textContent = `${done} / ${scope.length}`;
     els.progressBar.style.width = `${scope.length ? done / scope.length * 100 : 0}%`;
     els.scoreText.textContent = state.mode === "exam" && !state.examSubmitted ? "—" : `${correct} / ${graded.length}`;
   }
 
   function showResults() {
+    let submissionChanged = false;
     if (state.mode === "exam" && !state.examSubmitted) {
       state.examSubmitted = true;
-      saveState();
-      renderQuestion();
+      submissionChanged = true;
     }
+    if (state.mode === "retry" && !retrySubmitted) {
+      retrySubmitted = true;
+      submissionChanged = true;
+    }
+    if (submissionChanged) { saveState(); renderQuestion(); }
     const scope = scopedQuestions();
-    const graded = scope.filter((q) => isGradable(q) && answered(q));
-    const correct = graded.filter((q) => isCorrect(q)).length;
+    const submittedScope = state.mode === "exam" || state.mode === "retry";
+    const graded = scope.filter((q) => isGradable(q) && (submittedScope || answered(q)));
+    const correct = graded.filter((q) => answered(q) && isCorrect(q)).length;
     const percent = graded.length ? Math.round(correct / graded.length * 100) : 0;
     els.resultScore.textContent = `${percent}%`;
     els.resultCopy.textContent = state.mode === "retry"
-      ? `Đúng ${correct}/${graded.length} câu đã trả lời. Đã làm lại ${scope.filter((q) => answered(q)).length}/${scope.length} câu sai, chưa hoàn thành hoặc được đánh dấu.`
+      ? `Đúng ${correct}/${graded.length} câu có thể chấm tự động. Đã làm lại ${scope.filter((q) => answered(q)).length}/${scope.length} câu sai, chưa hoàn thành hoặc được đánh dấu.`
       : `Đúng ${correct}/${graded.length} câu có thể chấm tự động. Đã xử lý ${scope.filter((q) => answered(q)).length}/${scope.length} câu toàn bộ đề.`;
     els.dialog.showModal();
   }

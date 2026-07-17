@@ -9,6 +9,7 @@
     "elapsed": 0,
     "paused": false,
     "mode": "practice",
+    "examSubmitted": false,
     "retryQueue": [],
     "retryAnswers": {},
     "retryChecked": {}

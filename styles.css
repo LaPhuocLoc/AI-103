@@ -128,6 +128,7 @@ button { cursor: pointer; }
 .nav-item.answered { background: var(--accent-strong); border-color: var(--accent-strong); color: #fff; }
 .nav-item.correct { background: var(--correct-border); border-color: var(--correct-border); color: var(--correct-nav-ink); }
 .nav-item.wrong { background: var(--wrong-nav-fill); border-color: var(--wrong-border); color: var(--wrong-nav-ink); }
+.nav-item.incomplete { border-style: dashed; }
 .nav-item.flagged { box-shadow: inset 0 0 0 2px #e8b35f; }
 .nav-state-marker { position: absolute; right: 2px; bottom: 0; max-width: calc(100% - 3px); font-size: 8px; line-height: 1; letter-spacing: -1px; }
 .source-link { display: block; margin-top: 20px; color: var(--accent-foreground); font-size: 12px; text-decoration: none; }
