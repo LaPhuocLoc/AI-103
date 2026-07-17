@@ -46,7 +46,7 @@ function bootApp(initialState, {
   abState = { current: 99 }, committedPayload, questions, matchingData = {}, dragIds = []
 } = {}) {
   const ids = [
-    "questionGrid", "questionNumber", "typePill", "questionStem", "choices", "manualNote",
+    "questionGrid", "questionNumber", "typePill", "caseContext", "questionStem", "choices", "manualNote",
     "answerCard", "answerStatus", "correctAnswer", "explanationText", "pageLink", "prevButton",
     "nextButton", "checkButton", "flagButton", "tipButton", "tipPanel", "tipKeywords", "tipAnswer",
     "tipMnemonic", "tipTraps", "tipUltraShort", "progressText", "progressBar", "scoreText", "timer",

@@ -47,16 +47,16 @@
       sources: ["https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/tool-catalog"]
     },
     77: {
-      keywords: "buộc đúng MCP tool mỗi run; không cho model tự chọn; grounded citations",
-      mnemonic: "Buộc đúng họ công cụ MCP → chọn `type: mcp`.",
+      keywords: "buộc MCP; D là lựa chọn gần nhất; payload thực tế cần `server_label`",
+      mnemonic: "Chọn D theo đề; khi gọi thật phải thêm `server_label`.",
       trapNotes: {
         A: "`tool_choice=\"required\"` buộc gọi ít nhất một tool nhưng có thể chọn tool khác nếu agent có nhiều tool; không khóa riêng MCP.",
         B: "`tool_choice=\"auto\"` để model tự quyết định gọi tool hay trả lời trực tiếp; đây chính là hành vi gây thiếu grounding trong đề.",
         C: "`type: \"knowledge_base\"` không phải loại `tool_choice` được hỗ trợ; kho tri thức của tình huống được phơi qua MCP.",
-        D: "`tool_choice={\"type\":\"mcp\"}` là đáp án đúng trong các lựa chọn vì chỉ định loại MCP; API mới có thể còn yêu cầu `server_label` để khóa đúng máy chủ cụ thể."
+        D: "D là lựa chọn gần nhất, nhưng payload trong đáp án chưa đầy đủ: `ToolChoiceMCP` bắt buộc có `server_label`; thêm `name` nếu cần khóa một tool cụ thể."
       },
-      ultraShort: "Buộc gọi MCP thay vì base model → D, `tool_choice={\"type\":\"mcp\"}`.",
-      sources: ["https://learn.microsoft.com/en-us/rest/api/aifoundry/azureopenai/realtime", "https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/tool-best-practice"]
+      ultraShort: "D gần nhất; dùng thật: `{\"type\":\"mcp\",\"server_label\":\"<label>\"}` (+ `name` nếu khóa tool).",
+      sources: ["https://learn.microsoft.com/en-us/python/api/azure-ai-projects/azure.ai.projects.models.toolchoicemcp", "https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/tool-best-practice"]
     },
     78: {
       keywords: "ba custom tools; tìm tool chiếm nhiều thời gian nhất; độ trễ từng lần gọi",
@@ -232,12 +232,12 @@
     },
     93: {
       keywords: "validation so khớp mẫu; lệch câu chữ nhỏ; cần ổn định; tối đa chất lượng suy luận",
-      mnemonic: "Ít biến thiên chọn temperature 0; suy luận tối đa chọn effort high.",
+      mnemonic: "Ít biến thiên chọn `temperature=0`; suy luận tối đa chọn `effort=\"high\"`.",
       trapNotes: {
-        Temperature: "Temperature 0 là đúng vì giảm tính ngẫu nhiên và biến thể câu chữ; 1 và 2 tăng đa dạng, phù hợp sáng tạo hơn là so khớp output tự động.",
-        "Output effort": "`\"high\"` là đúng vì dành nhiều effort hơn cho chất lượng suy luận; `low` ưu tiên nhanh/rẻ, `medium` cân bằng nhưng không đạt yêu cầu tối đa."
+        Temperature: "`temperature=0` là đúng vì giảm ngẫu nhiên và giữ câu chữ ổn định; 1 và 2 tăng độ đa dạng, không phù hợp khi cần so khớp đầu ra tự động.",
+        "Output effort": "`effort=\"high\"` ưu tiên chất lượng suy luận; `low` ưu tiên tốc độ/chi phí và `medium` cân bằng. Chỉ dùng tham số này với model/API có hỗ trợ."
       },
-      ultraShort: "Ổn định wording + suy luận tối đa → Temperature 0; Output effort `\"high\"`.",
+      ultraShort: "Câu chữ ổn định + suy luận tối đa → `temperature=0`; `effort=\"high\"` nếu model hỗ trợ.",
       sources: ["https://learn.microsoft.com/en-us/azure/foundry/foundry-models/how-to/use-foundry-models-claude", "https://learn.microsoft.com/en-us/microsoft-copilot-studio/prompt-model-settings"]
     },
     94: {
@@ -277,21 +277,21 @@
       sources: ["https://learn.microsoft.com/en-us/azure/foundry/observability/concepts/trace-data"]
     },
     97: {
-      keywords: "clause đã có trong retrieved content; summary bỏ sót; tăng max_tokens",
-      mnemonic: "Nếu bị cắt vì trần đầu ra, nới `max_tokens` để viết đủ.",
+      keywords: "ngân hàng câu hỏi thiếu `finish_reason=length`; A chỉ đúng theo key nếu đầu ra bị cắt",
+      mnemonic: "Chỉ tăng `max_tokens` khi đã xác nhận đầu ra chạm giới hạn.",
       trapNotes: {
-        A: "Yes là đáp án theo giả định thiếu do output bị truncate: tăng `max_tokens` cho model đủ chỗ sinh các clause còn lại; nên kiểm tra `finish_reason=length` để xác nhận.",
-        B: "No chỉ đúng nếu nguyên nhân không phải giới hạn độ dài, chẳng hạn prompt không yêu cầu đủ clause; nhưng đề coi tăng giới hạn đầu ra là giải pháp đáp ứng mục tiêu."
+        A: "A là đáp án theo key chỉ khi đầu ra bị cắt do giới hạn token; cần thấy `finish_reason=length` rồi mới kết luận tăng `max_tokens` sẽ giúp.",
+        B: "Stem không cho tín hiệu `finish_reason=length`, nên không đủ dữ kiện biến A thành quy tắc chung; nếu thiếu do prompt hoặc sinh nội dung, tăng giới hạn không bảo đảm sửa lỗi."
       },
-      ultraShort: "Clause có sẵn nhưng output có thể bị cắt → A, Yes: tăng `max_tokens`.",
+      ultraShort: "Theo key: A chỉ khi `finish_reason=length`; stem hiện thiếu tín hiệu này.",
       sources: ["https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/chatgpt", "https://learn.microsoft.com/en-us/azure/foundry/openai/how-to/latency"]
     },
     98: {
       keywords: "retrieval đã có clause; response vẫn thiếu; reflection kiểm tra rồi regenerate",
       mnemonic: "Thiếu thì soi lại và viết lại → reflection sửa được đầu ra.",
       trapNotes: {
-        A: "Yes là đúng vì reflection phát hiện clause thiếu và kích hoạt regeneration có chỉ dẫn sửa lỗi, nên tạo cơ hội trả về bản đầy đủ hơn.",
-        B: "No không đúng vì đây không chỉ là đo lường: workflow thực hiện hành động khắc phục bằng cách sinh lại response khi phát hiện thiếu."
+        A: "Theo key và logic của lựa chọn, Yes phù hợp vì reflection phát hiện phần thiếu rồi kích hoạt sinh lại có chỉ dẫn sửa; ngân hàng câu hỏi không cung cấp explanation.",
+        B: "Theo key, No không phù hợp vì lựa chọn mô tả cả bước kiểm tra lẫn sinh lại, không chỉ đo lường; ngân hàng câu hỏi không có explanation để đối chiếu."
       },
       ultraShort: "Kiểm tra thiếu rồi regenerate → A, Yes: reflection pass cải thiện completeness.",
       sources: ["https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators"]
@@ -300,8 +300,8 @@
       keywords: "thiếu clause bắt buộc; context đã đủ; tăng temperature",
       mnemonic: "Cần đủ và ổn định thì không tăng độ ngẫu nhiên.",
       trapNotes: {
-        A: "Yes sai vì temperature cao chỉ tăng đa dạng và sáng tạo, không bảo đảm liệt kê đủ clause; thậm chí có thể làm output kém nhất quán hơn.",
-        B: "No là đúng vì vấn đề là completeness, còn tăng temperature điều chỉnh randomness; nên dùng chỉ dẫn, token budget hoặc vòng kiểm tra/sinh lại."
+        A: "Theo key và logic tham số, Yes không phù hợp: temperature cao tăng đa dạng, không bảo đảm liệt kê đủ clause; ngân hàng câu hỏi không cung cấp explanation.",
+        B: "Theo key, No phù hợp vì temperature điều chỉnh độ ngẫu nhiên chứ không trực tiếp sửa độ đầy đủ; ngân hàng câu hỏi không có explanation để đối chiếu."
       },
       ultraShort: "Tăng randomness không chữa thiếu clause → B, No.",
       sources: ["https://learn.microsoft.com/en-us/microsoft-copilot-studio/prompt-model-settings", "https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators"]
@@ -310,20 +310,20 @@
       keywords: "evaluation chấm completeness; block dưới threshold; không retry hay regenerate",
       mnemonic: "Chấm và chặn chỉ phát hiện lỗi; muốn tốt hơn phải sửa hoặc sinh lại.",
       trapNotes: {
-        A: "Yes sai vì evaluator và threshold chỉ đo rồi chặn response thiếu; không biến response đó thành đầy đủ nếu không có bước corrective action.",
-        B: "No là đúng: evaluation flow đơn thuần phát hiện/kiểm soát chất lượng; cần thêm retry, reflection hoặc regeneration mới cải thiện nội dung."
+        A: "Theo key và logic của lựa chọn, Yes không phù hợp: chấm điểm rồi chặn không tự sửa câu trả lời nếu thiếu bước sinh lại; ngân hàng câu hỏi không có explanation.",
+        B: "Theo key, No phù hợp vì evaluation chỉ phát hiện/kiểm soát chất lượng; cần thêm retry hoặc regeneration mới sửa nội dung. Không có explanation gốc để đối chiếu."
       },
       ultraShort: "Chỉ score + block, không sửa/sinh lại → B, No.",
       sources: ["https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators"]
     },
     101: {
-      keywords: "traffic biến động; không reserved throughput; dữ liệu xử lý trong EU; giữ nguyên model version",
-      mnemonic: "Một vùng, trả theo dùng → Standard; giữ phiên bản → opt out upgrade.",
+      keywords: "Ngữ cảnh Case Study: tải biến động, không dành trước thông lượng; dữ liệu ở EU; giữ phiên bản ổn định",
+      mnemonic: "Ở EU, tự co giãn → Standard; giữ phiên bản → opt out nâng tự động.",
       trapNotes: {
         "Deployment type": "Standard là đúng vì pay-per-token, tự phục vụ traffic biến động và xử lý trong deployment region; Global có thể xử lý ngoài EU, Provisioned cần capacity dành trước.",
         "Version update policy": "Opt out of automatic model version upgrades là đúng để giữ hành vi ổn định; các chính sách nâng khi hết hạn hoặc khi có default mới đều cho phép đổi version tự động."
       },
-      ultraShort: "Biến động, không PTU, giữ dữ liệu vùng → Standard; cố định version → opt out auto upgrades.",
+      ultraShort: "Tải biến động, dữ liệu ở EU → Standard; giữ phiên bản → opt out nâng tự động.",
       sources: ["https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/deployment-types", "https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/model-versions"]
     },
     102: {
@@ -339,15 +339,15 @@
       sources: ["https://learn.microsoft.com/en-us/azure/ai-services/content-safety/concepts/jailbreak-detection"]
     },
     103: {
-      keywords: "đánh giá RAG trên product sheets; response phải relevant, complete, accurate",
-      mnemonic: "Nhiều mặt của cả retrieval lẫn answer → RAG evaluator.",
+      keywords: "Ngữ cảnh Case Study: dùng product sheets; câu trả lời phải liên quan, đầy đủ và chính xác",
+      mnemonic: "Đánh giá cả truy xuất lẫn câu trả lời → RAG evaluator.",
       trapNotes: {
         A: "RAG evaluator là đúng vì đánh giá pipeline truy xuất và sinh trên nhiều mặt như relevance, groundedness và completeness.",
         B: "Custom guardrail thực thi chính sách hoặc chặn hành vi; dùng cho an toàn/phạm vi, không phải bộ đo chất lượng RAG tổng thể.",
         C: "Fine-tuning thay đổi model để thích nghi tác vụ; không phải cơ chế đo response hiện tại có relevant, complete và accurate hay không.",
         D: "Groundedness evaluator chỉ kiểm tra response bám context, là một mặt của accuracy; không bao quát relevance và completeness như yêu cầu."
       },
-      ultraShort: "Đánh giá RAG đủ relevance + completeness + groundedness → A, RAG evaluator.",
+      ultraShort: "Đánh giá RAG nhiều mặt → A, RAG evaluator.",
       sources: ["https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators"]
     },
     104: {
@@ -363,7 +363,7 @@
       sources: ["https://learn.microsoft.com/en-us/azure/foundry/concepts/retrieval-augmented-generation"]
     },
     105: {
-      keywords: "hóa đơn nhiều layout; bảng và logo; hiểu cả thị giác lẫn văn bản; trích dữ liệu để đối chiếu hợp đồng",
+      keywords: "Ngữ cảnh Case Study: hóa đơn có bảng, logo, nhiều bố cục; cần hiểu hình ảnh lẫn văn bản",
       mnemonic: "Hóa đơn phức tạp cần hiểu nội dung và bố cục → Content Understanding.",
       trapNotes: {
         A: "Chat completions sinh ngôn ngữ từ prompt; không tự xây pipeline OCR, layout và structured field extraction cho hóa đơn.",
@@ -371,11 +371,11 @@
         C: "Azure Content Understanding là đúng vì kết hợp OCR, layout, bảng và field extraction trên tài liệu có mẫu khác nhau để phục vụ đối chiếu.",
         D: "Image Analysis nhận diện đối tượng, đặc trưng và text trong ảnh; không chuyên trích field nghiệp vụ và quan hệ bảng của hóa đơn phức tạp."
       },
-      ultraShort: "Invoice đa layout + bảng/logo + text/visual → C, Azure Content Understanding.",
+      ultraShort: "Hóa đơn nhiều bố cục + bảng/logo + hình/chữ → C, Azure Content Understanding.",
       sources: ["https://learn.microsoft.com/en-us/azure/ai-services/content-understanding/concepts/analyzer-reference"]
     },
     106: {
-      keywords: "PDF dài; indexing pipeline; semantic và vector search; chọn hai built-in skills",
+      keywords: "Ngữ cảnh Case Study: product sheets là PDF; pipeline phải hỗ trợ semantic và vector search",
       mnemonic: "Chia nhỏ trước, biến thành vector sau → Text Split + Embedding.",
       trapNotes: {
         A: "Azure OpenAI Embedding là đúng vì biến từng chunk thành vector để tìm kiếm tương đồng; đây là thành phần bắt buộc cho vector search.",
@@ -385,11 +385,11 @@
         E: "Language Detection nhận diện ngôn ngữ để định tuyến xử lý; không trực tiếp tạo chunk hay embedding cho vector search.",
         F: "Key phrase extraction tạo cụm từ nổi bật; có thể bổ sung metadata nhưng không thay thế vector embedding và chunking."
       },
-      ultraShort: "PDF cho semantic/vector RAG → A + C: Azure OpenAI Embedding và Text Split.",
+      ultraShort: "PDF cần chia đoạn và tạo vector → A + C, Azure OpenAI Embedding + Text Split.",
       sources: ["https://learn.microsoft.com/en-us/azure/search/search-how-to-semantic-chunking", "https://learn.microsoft.com/en-us/azure/search/cognitive-search-skill-azure-openai-embedding"]
     },
     107: {
-      keywords: "product sheets nội bộ trong Blob; indexing; semantic + vector search; RAG cho agent",
+      keywords: "Ngữ cảnh Case Study: product sheets ở Blob storage1; cần lập chỉ mục semantic và vector",
       mnemonic: "Tài liệu nội bộ cần lập chỉ mục và truy xuất → Azure AI Search.",
       trapNotes: {
         A: "Azure Translator dịch ngôn ngữ; dùng khi cần bản dịch, không cung cấp indexing, semantic search hay vector search cho product sheets.",
@@ -397,7 +397,7 @@
         C: "Azure AI Search là đúng vì lập chỉ mục Blob, hỗ trợ semantic/vector retrieval và cung cấp đoạn liên quan để agent tạo câu trả lời có căn cứ.",
         D: "Azure Document Intelligence trích text và layout từ PDF; có thể hỗ trợ ingestion nhưng không phải retrieval engine semantic/vector cho RAG."
       },
-      ultraShort: "Blob nội bộ + index + semantic/vector RAG → C, Azure AI Search.",
+      ultraShort: "Blob nội bộ + chỉ mục semantic/vector → C, Azure AI Search.",
       sources: ["https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview"]
     }
   };

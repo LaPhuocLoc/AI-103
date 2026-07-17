@@ -218,26 +218,26 @@
     },
     20: {
       keywords: "nhiều biến thể từ ảnh gốc; giữ bố cục, ánh sáng, chủ thể",
-      mnemonic: "Muốn các bản khác nhau nhưng cùng khung gốc → image_variation.",
+      mnemonic: "Theo đề, A là image_variation; Learn hiện hành đặt variations dưới Image Edit API.",
       trapNotes: {
-        A: "Đúng theo đề: image_variation với ảnh gốc tạo nhiều phương án mà vẫn dựa trên đặc trưng tổng thể của ảnh.",
+        A: "Đúng theo wording của đề. Microsoft Learn hiện hành mô tả variations qua Image Edit API, nhưng không xác nhận mode/parameter tên image_variation.",
         B: "Sai: mask_inpainting dùng sửa vùng chọn; mask toàn ảnh làm mất mục tiêu giữ nguyên bố cục.",
         C: "Sai: text_to_image sinh mới từ mô tả, không bảo đảm đúng bố cục và ánh sáng của ảnh gốc.",
         D: "Sai: image_to_image với strength=1.0 ưu tiên tái sinh mạnh, dễ rời xa ảnh đầu vào."
       },
-      ultraShort: "Tạo nhiều biến thể nhưng giữ khung ảnh gốc → A. image_variation.",
+      ultraShort: "Theo wording đề: A. image_variation; Learn hiện hành: variations qua Image Edit API, không xác nhận mode/parameter này.",
       sources: ["https://learn.microsoft.com/en-us/azure/foundry/openai/how-to/dall-e"]
     },
     21: {
       keywords: "PDF quét; OCR; bảng nhiều trang; chunk theo cấu trúc; metadata số trang",
-      mnemonic: "Tài liệu phức tạp mất cấu trúc → reingest bằng advanced data parsing.",
+      mnemonic: "Theo nhãn trong đề, chọn advanced data parsing; nguồn chỉ xác nhận năng lực parsing/layout.",
       trapNotes: {
-        A: "Đúng theo đề: advanced data parsing tái OCR và giữ bảng, heading, cấu trúc cùng metadata trang cho RAG.",
+        A: "Đúng theo nhãn trong đề/surface ingestion. Nguồn Learn xác nhận parsing/layout có OCR và phần tử trang, bảng, section; không xác nhận literal advanced data parsing.",
         B: "Sai: OCR cộng page-level chunking vẫn gom theo ranh giới trang, không bảo toàn chunk theo bảng/heading.",
         C: "Sai: mỗi trang một chunk làm chunk lớn và cắt quan hệ bảng nhiều trang, giảm độ chính xác retrieval.",
         D: "Sai: basic parsing và fixed-size chunking tiếp tục làm mất cấu trúc ngữ nghĩa và metadata trang."
       },
-      ultraShort: "OCR + bảng nhiều trang + structure-aware chunks → A. advanced data parsing.",
+      ultraShort: "Theo nhãn đề: A. advanced data parsing; Learn chỉ xác nhận OCR/cấu trúc/layout, không xác nhận literal này.",
       sources: ["https://learn.microsoft.com/en-us/azure/ai-services/content-understanding/document/elements"]
     },
     22: {
@@ -369,12 +369,12 @@
     },
     33: {
       keywords: "refund; workflow YAML; dừng chờ người duyệt; chỉ hoàn tiền khi approved",
-      mnemonic: "Hỏi để dừng; kiểm approved để chạy.",
+      mnemonic: "Theo schema/version của đề: ask_question để chờ; kiểm approved để chạy.",
       trapNotes: {
-        "Approval step type": "Chọn ask_question để workflow tạm dừng và nhận quyết định người duyệt; basic_chat/data_transformation không tạo approval gate.",
+        "Approval step type": "Theo literal schema/version của đề, chọn ask_question. Nguồn Learn hiện hành chỉ xác nhận HITL có thể tạm dừng/chờ input, không xác nhận tên key này.",
         "Execute refund condition": "Chọn approval == \"approved\" để chỉ gọi refund sau chấp thuận; output khác null hay true vẫn cho chạy khi chưa duyệt."
       },
-      ultraShort: "Human approval → ask_question; refund condition → approval == \"approved\".",
+      ultraShort: "Theo schema/version đề: ask_question; Learn chỉ xác nhận HITL pause/wait. Refund khi approval == \"approved\".",
       sources: ["https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/workflow"]
     },
     34: {

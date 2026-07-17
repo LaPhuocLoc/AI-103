@@ -14,7 +14,9 @@ Mở trực tiếp `index.html` bằng trình duyệt để học trên máy cá
 
 ## Mẹo cho từng câu
 
-Mỗi câu trong bộ 107 câu có nút **💡 Mẹo** với keyword nhận diện, đáp án cần nhớ, mẹo nhớ, phân tích từng lựa chọn/bẫy và bản siêu ngắn. Ở chế độ **Luyện tập** và **Làm lại câu sai**, mẹo có thể mở bất kỳ lúc nào. Ở chế độ **Thi thử**, nút mẹo chỉ được mở sau khi nộp bài để không làm lộ đáp án trong lúc thi.
+Mỗi câu trong bộ 107 câu có nút **💡 Mẹo** với keyword nhận diện, đáp án cần nhớ, mẹo nhớ, phân tích từng lựa chọn/bẫy và bản siêu ngắn. Toàn bộ nội dung học tập được biên tập thủ công theo từng câu và đối chiếu với nguồn Microsoft Learn; phần phân biệt bẫy không còn được sinh tự động từ lời giải tiếng Anh.
+
+Ở chế độ **Luyện tập** và **Làm lại câu sai**, mẹo có thể mở bất kỳ lúc nào. Ở chế độ **Thi thử**, nút mẹo chỉ được mở sau khi nộp bài để không làm lộ đáp án trong lúc thi.
 
 Việc mở hoặc đóng mẹo không thay đổi câu trả lời, điểm, thời gian, cờ đánh dấu hay file state.
 

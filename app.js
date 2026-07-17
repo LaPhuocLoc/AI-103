@@ -3,13 +3,14 @@
   const matchingData = window.AI103_MATCHING || {};
   const dragQuestionIds = new Set(window.AI103_DRAG_IDS || []);
   const tips = window.AI103_TIPS || {};
+  const caseContexts = window.AI103_CASE_CONTEXT || {};
   const STORAGE_KEY = "ai103-mock-state-v1";
   const THEME_KEY = "ai103-theme";
   const PDF_FILE = "AI-103.pdf";
   const STATE_FILE = "ai103-progress-state.json";
   const $ = (id) => document.getElementById(id);
   const els = {
-    grid: $("questionGrid"), number: $("questionNumber"), type: $("typePill"), stem: $("questionStem"),
+    grid: $("questionGrid"), number: $("questionNumber"), type: $("typePill"), caseContext: $("caseContext"), stem: $("questionStem"),
     choices: $("choices"), manual: $("manualNote"), answerCard: $("answerCard"), answerStatus: $("answerStatus"),
     correctAnswer: $("correctAnswer"), explanation: $("explanationText"), pageLink: $("pageLink"),
     prev: $("prevButton"), next: $("nextButton"), check: $("checkButton"), flag: $("flagButton"), tip: $("tipButton"),
@@ -229,6 +230,9 @@
       ? `Câu ${q.id} · ${position + 1} / ${scope.length} câu cần làm lại`
       : `Câu ${q.id} / ${questions.length}`;
     els.type.textContent = groups ? `${dragMode ? "Kéo thả" : "Ghép cặp"} · ${groups.length} ô` : (q.gradable ? (q.multiple ? "Chọn nhiều đáp án" : "Chọn một đáp án") : "Tình huống");
+    const caseContext = caseContexts[q.id];
+    els.caseContext.hidden = !caseContext;
+    els.caseContext.textContent = caseContext || "";
     els.stem.textContent = q.stem || q.rawQuestion;
     els.choices.innerHTML = "";
     els.choices.classList.toggle("matching-groups", Boolean(groups));

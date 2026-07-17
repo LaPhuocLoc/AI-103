@@ -247,13 +247,13 @@
     },
     59: {
       keywords: "Content Safety đọc ảnh qua blob URL; không key/SAS; least privilege; chỉ đọc blob",
-      mnemonic: "Không secret dùng system-assigned identity; chỉ đọc dữ liệu dùng Blob Data Reader.",
+      mnemonic: "Thi theo đề: system-assigned identity + Reader; triển khai blobUrl: Contributor/Owner, Reader có thể không chạy.",
       trapNotes: {
-        Authentication: "Chọn System-assigned managed identity theo đáp án đề để tránh key và SAS; user-assigned chỉ cần khi phải dùng chung vòng đời danh tính.",
-        "Azure RBAC role": "Chọn Storage Blob Data Reader theo đáp án và nguyên tắc chỉ đọc; Contributor ghi/xóa, Queue role sai loại dữ liệu, Owner quá rộng."
+        Authentication: "Đáp án ngân hàng đề chọn System-assigned managed identity để tránh key và SAS; phần danh tính này phù hợp cách quickstart cấu hình Content Safety.",
+        "Azure RBAC role": "Để thi đúng đề, chọn Storage Blob Data Reader. Nhưng Microsoft Learn hiện chỉ chấp nhận Storage Blob Data Contributor hoặc Owner cho Content Safety đọc blobUrl; Reader có thể không chạy và không phải cấu hình triển khai hợp lệ hiện hành."
       },
-      ultraShort: "Không secret + chỉ đọc blob → system-assigned identity + Storage Blob Data Reader.",
-      sources: ["https://learn.microsoft.com/en-us/azure/ai-services/content-safety/quickstart-image", "https://learn.microsoft.com/en-us/azure/storage/blobs/assign-azure-role-data-access"]
+      ultraShort: "Thi Q59: system-assigned MI + Reader. Thực tế Content Safety blobUrl: chỉ Contributor/Owner; Reader có thể không chạy.",
+      sources: ["https://learn.microsoft.com/en-us/azure/ai-services/content-safety/quickstart-image", "https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/storage"]
     },
     60: {
       keywords: "ảnh gốc của jacket; đổi nền, ánh sáng, bối cảnh; phải giữ đúng sản phẩm",
@@ -293,13 +293,13 @@
     },
     63: {
       keywords: "ngăn nội dung có hại xuyên suốt agent run; ảnh qua blob URL; least privilege",
-      mnemonic: "Muốn ngăn thì Block ở mọi điểm; muốn đọc blob thì identity + quyền đọc.",
+      mnemonic: "Thi: Block đủ 4 điểm, storage chọn MI + Reader; triển khai blobUrl cần Contributor/Owner.",
       trapNotes: {
         Guardrails: "Chọn User input, Output, Tool response và Tool call với Action=Block: bao phủ toàn luồng và thật sự ngăn; Annotate chỉ ghi nhận.",
-        "Storage access": "Chọn system-assigned managed identity + Storage Blob Data Reader theo đáp án: không dùng secret và chỉ cấp quyền đọc; Queue sai dịch vụ, Contributor quá rộng."
+        "Storage access": "Để thi đúng ngân hàng đề, chọn system-assigned managed identity + Storage Blob Data Reader. Khi triển khai Content Safety với blobUrl, Microsoft Learn hiện chỉ chấp nhận Storage Blob Data Contributor hoặc Owner; Reader có thể không chạy."
       },
-      ultraShort: "Block cả 4 điểm; blob dùng system-assigned identity + Storage Blob Data Reader.",
-      sources: ["https://learn.microsoft.com/en-us/azure/foundry/guardrails/how-to-create-guardrails", "https://learn.microsoft.com/en-us/azure/ai-services/content-safety/quickstart-image"]
+      ultraShort: "Thi Q63: Block 4 điểm + MI/Reader. Thực tế blobUrl: Contributor/Owner; Reader có thể không chạy.",
+      sources: ["https://learn.microsoft.com/en-us/azure/foundry/guardrails/how-to-create-guardrails", "https://learn.microsoft.com/en-us/azure/ai-services/content-safety/quickstart-image", "https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/storage"]
     },
     64: {
       keywords: "cải thiện completeness; xử lý trong application code; trước khi trả response",

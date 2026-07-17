@@ -11,7 +11,7 @@ const REQUIRED_IDS = [
   "scoreText", "syncStatus", "exportProgress", "loadProgress", "clearProgress",
   "questionGrid", "sidebarBackdrop", "menuButton", "themeToggle", "modeSelect",
   "finishButton", "questionCard", "questionNumber", "typePill", "tipButton", "flagButton",
-  "questionStem", "tipPanel", "tipKeywords", "tipAnswer", "tipMnemonic", "tipTraps",
+  "caseContext", "questionStem", "tipPanel", "tipKeywords", "tipAnswer", "tipMnemonic", "tipTraps",
   "tipUltraShort", "choices", "manualNote", "prevButton", "checkButton", "nextButton",
   "answerCard", "answerStatus", "pageLink", "correctAnswer", "explanationText",
   "resultDialog", "dialogClose", "resultTitle", "resultScore", "resultCopy",
@@ -84,7 +84,16 @@ test("question card exposes an accessible tip control and structured tip panel",
   for (const id of ["tipKeywords", "tipAnswer", "tipMnemonic", "tipTraps", "tipUltraShort"]) {
     assert.match(html, new RegExp(`id="${id}"`));
   }
-  assert.match(html, /<script src="tips\.js"><\/script>\s*<script src="app\.js\?v=4"><\/script>/);
+  assert.match(html, /<script src="tips-batches\/tips-1-36\.js\?v=2"><\/script>/);
+  assert.match(html, /<script src="tips-batches\/tips-37-72\.js\?v=2"><\/script>/);
+  assert.match(html, /<script src="tips-batches\/tips-73-107\.js\?v=2"><\/script>/);
+  assert.match(html, /<script src="tips\.js\?v=2"><\/script>\s*<script src="app\.js\?v=5"><\/script>/);
+});
+
+test("question card can display restored case-study context before the stem", () => {
+  assert.match(html, /id="caseContext"[^>]*hidden/);
+  assert.match(html, /<script src="case-study-data\.js\?v=1"><\/script>/);
+  assert.match(app, /AI103_CASE_CONTEXT/);
 });
 
 test("tip colors meet WCAG AA contrast in both themes", () => {

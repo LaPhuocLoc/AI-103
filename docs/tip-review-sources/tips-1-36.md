@@ -45,3 +45,9 @@
 - Q20 dùng tên `image_variation` theo dữ liệu đề; tài liệu hiện hành tập trung API image generation/edit và có thể đổi tên surface theo phiên bản.
 - Q21 dùng cụm “advanced data parsing” theo đáp án đề; nguồn Learn xác nhận năng lực OCR, table/section/page metadata, nhưng tên tùy chọn có thể phụ thuộc giao diện ingestion.
 - Q33 nguồn workflow đang thay đổi theo portal/SDK; cần giữ nguyên `ask_question` và biểu thức YAML theo dữ liệu đề khi review.
+
+## Fix wave
+
+- Q20: Giữ đáp án A theo wording đề; làm rõ Microsoft Learn hiện hành mô tả variations qua Image Edit API và không xác nhận mode/parameter `image_variation`. Nguồn: https://learn.microsoft.com/en-us/azure/foundry/openai/how-to/dall-e
+- Q21: Ghi rõ `advanced data parsing` là nhãn trong đề/surface ingestion; nguồn hiện tại chỉ xác nhận năng lực OCR, parsing và layout (page/section/table), không xác nhận literal này. Nguồn: https://learn.microsoft.com/en-us/azure/ai-services/content-understanding/document/elements
+- Q33: Ghi rõ `ask_question` là literal theo schema/version của đề; nguồn workflow hiện hành chỉ xác nhận hành vi HITL tạm dừng/chờ input, không xác nhận tên key. Nguồn: https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/workflow

@@ -163,6 +163,8 @@ select { min-width: 130px; padding: 9px 34px 9px 12px; border: 1px solid var(--l
 .question-tools { display: flex; align-items: center; gap: 10px; }
 .tip-button { padding: 7px 11px; border: 1px solid var(--tip-border); border-radius: 10px; background: var(--tip-surface); color: var(--tip-foreground); font-size: 13px; font-weight: 800; }
 .tip-button:hover:not(:disabled), .tip-button[aria-expanded="true"] { box-shadow: 0 0 0 2px color-mix(in srgb, var(--tip-border) 32%, transparent); }
+.case-context { margin: 24px 0 -6px; padding: 14px 16px; border-left: 4px solid var(--accent); border-radius: 0 12px 12px 0; background: var(--accent-soft); color: var(--ink); font-size: 14px; line-height: 1.55; }
+.case-context[hidden] { display: none; }
 .question-stem { margin: 26px 0; font-size: 17px; white-space: pre-wrap; }
 .question-stem::first-line { font-weight: 600; }
 .tip-panel { margin: -8px 0 24px; padding: 19px 20px; background: var(--tip-surface); border: 1px solid var(--tip-border); border-radius: 14px; color: var(--tip-foreground); }
