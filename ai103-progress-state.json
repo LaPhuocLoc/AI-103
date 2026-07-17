@@ -1,144 +1,572 @@
 {
   "schemaVersion": 1,
-  "exportedAt": "2026-07-17T09:14:30.447Z",
+  "exportedAt": "2026-07-17T20:23:08.059Z",
   "state": {
-    "current": 0,
+    "current": 2,
     "answers": {
-      "2": [
-        "A"
+      "1": [
+        "D"
       ],
-      "13": {
-        "0": "auto",
-        "1": "Storing API keys in prompts"
+      "2": [
+        "D"
+      ],
+      "3": {
+        "0": "Set action to block",
+        "1": "Create a custom blocklist"
       },
-      "24": [
-        "E",
-        "D",
+      "4": [
         "C"
       ],
+      "5": [
+        "B"
+      ],
+      "6": {
+        "0": "Grounding with Bing Search",
+        "1": "Code interpreter",
+        "2": "Microsoft Fabric"
+      },
+      "7": [
+        "C"
+      ],
+      "8": [
+        "A"
+      ],
+      "9": {
+        "0": "Compare against the latest approved baseline",
+        "1": "Fail the workflow"
+      },
+      "10": {
+        "0": "Yes",
+        "1": "Yes",
+        "2": "No"
+      },
+      "11": [
+        "D"
+      ],
+      "12": [
+        "B"
+      ],
+      "13": {
+        "0": "required",
+        "1": "Using a distinct agent identity bound to the client application"
+      },
+      "14": [
+        "C"
+      ],
+      "15": [
+        "A"
+      ],
+      "16": {
+        "0": "\"tool_choice\"",
+        "1": "\"required\""
+      },
+      "17": [
+        "C"
+      ],
+      "18": [
+        "B"
+      ],
+      "19": {
+        "0": "Groundedness evaluation",
+        "1": "Require the evaluation workflow to succeed before merging"
+      },
+      "20": [
+        "A"
+      ],
+      "21": [
+        "C"
+      ],
+      "22": [
+        "B"
+      ],
+      "23": {
+        "0": "Model Availability Rate and Provisioned Utilization",
+        "1": "trace"
+      },
+      "24": [
+        "C",
+        "B"
+      ],
+      "25": [
+        "A"
+      ],
+      "26": {
+        "0": "Groundedness evaluation metrics",
+        "1": "Risk and safety metrics"
+      },
+      "27": [
+        "D"
+      ],
+      "28": [
+        "B"
+      ],
+      "29": {
+        "0": "Agent memory that uses persistent storage",
+        "1": "File search tool"
+      },
+      "30": [
+        "D"
+      ],
+      "31": [
+        "C"
+      ],
+      "32": [
+        "A"
+      ],
+      "33": {
+        "0": "ask_question",
+        "1": "approval == \"approved\""
+      },
       "34": [
+        "D"
+      ],
+      "35": [
+        "D"
+      ],
+      "36": {
+        "0": "Single-file task in standard mode",
+        "1": "Multi-file task in pro mode"
+      },
+      "37": [
+        "B"
+      ],
+      "38": [
+        "A"
+      ],
+      "39": [
+        "A"
+      ],
+      "40": [
+        "B"
+      ],
+      "41": [
+        "C"
+      ],
+      "42": [
+        "C"
+      ],
+      "43": {
+        "0": "Not(IsBlank(Local.Var01))",
+        "1": "{Upper(Local.Var01)}"
+      },
+      "44": [
+        "C"
+      ],
+      "45": [
+        "B"
+      ],
+      "46": {
+        "0": "Single-file task in standard mode",
+        "1": "Multi-file task in pro mode"
+      },
+      "47": [
+        "D"
+      ],
+      "48": [
+        "C"
+      ],
+      "49": {
+        "0": "An Azure Login action that uses OpenID Connect (OIDC)",
+        "1": "Fail"
+      },
+      "50": [
+        "B"
+      ],
+      "51": [
+        "D"
+      ],
+      "52": [
+        "C"
+      ],
+      "53": {
+        "0": "DefaultAzureCredential",
+        "1": "retrieve"
+      },
+      "54": [
+        "A"
+      ],
+      "55": [
+        "C"
+      ],
+      "56": {
+        "0": "Groundedness evaluation metrics",
+        "1": "Token usage analytics"
+      },
+      "57": [
+        "B"
+      ],
+      "58": [
+        "B"
+      ],
+      "59": {
+        "0": "User-assigned managed identity",
+        "1": "Storage Blob Data Reader"
+      },
+      "60": [
+        "A"
+      ],
+      "61": [
+        "A"
+      ],
+      "62": [
+        "A"
+      ],
+      "63": {
+        "0": "Select User input, Output, Tool response, and Tool call and set Action to Block.",
+        "1": "A system-assigned managed identity that is assigned the Storage Blob Data Contributor role"
+      },
+      "64": [
+        "C"
+      ],
+      "65": [
+        "D"
+      ],
+      "66": {
+        "0": "Relevance Evaluation",
+        "1": "Prompt traces"
+      },
+      "67": [
+        "D"
+      ],
+      "68": [
+        "C"
+      ],
+      "69": {
+        "0": "Groundedness",
+        "1": "Fine-tune the model by using the retrieved documents."
+      },
+      "70": [
+        "D"
+      ],
+      "71": [
+        "D"
+      ],
+      "72": [
+        "B"
+      ],
+      "73": {
+        "0": "Agent memory that uses persistent storage",
+        "1": "File search tool"
+      },
+      "74": [
+        "B"
+      ],
+      "75": [
+        "D"
+      ],
+      "76": {
+        "0": "Code Interpreter",
+        "1": "Computer Use",
+        "2": "File Search"
+      },
+      "77": [
+        "D"
+      ],
+      "78": [
+        "B"
+      ],
+      "79": {
+        "0": "Code Interpreter Tool",
+        "1": "Grounding with Bing Search"
+      },
+      "80": [
+        "C"
+      ],
+      "81": [
+        "B"
+      ],
+      "82": [
+        "B"
+      ],
+      "83": {
+        "0": "File Search Tool",
+        "1": "File Search Tool"
+      },
+      "84": [
+        "D"
+      ],
+      "85": [
+        "D"
+      ],
+      "86": {
+        "0": "Grounding with Bing Search",
+        "1": "File Search",
+        "2": "Code Interpreter"
+      },
+      "87": [
+        "D"
+      ],
+      "88": [
+        "C"
+      ],
+      "89": {
+        "0": "Personal access token (PAT)",
+        "1": "Rotate PAT every 30 days"
+      },
+      "90": [
+        "B"
+      ],
+      "91": [
+        "B"
+      ],
+      "92": [
+        "C"
+      ],
+      "93": {
+        "0": "1",
+        "1": "\"high\""
+      },
+      "94": [
+        "C"
+      ],
+      "95": [
+        "A"
+      ],
+      "96": [
+        "B"
+      ],
+      "97": [
+        "B"
+      ],
+      "98": [
+        "A"
+      ],
+      "99": [
+        "B"
+      ],
+      "100": [
+        "A"
+      ],
+      "101": {
+        "0": "Standard",
+        "1": "Upgrade once a new default version becomes available"
+      },
+      "102": [
+        "B"
+      ],
+      "103": [
+        "D"
+      ],
+      "104": [
+        "A"
+      ],
+      "105": [
+        "B"
+      ],
+      "106": [
+        "E",
+        "F"
+      ],
+      "107": [
         "D"
       ]
     },
     "checked": {
-      "2": false,
+      "1": true,
+      "2": true,
+      "3": true,
+      "4": true,
+      "5": true,
+      "6": true,
+      "7": true,
+      "8": true,
+      "9": true,
+      "10": true,
+      "11": true,
+      "12": true,
       "13": true,
-      "24": false,
-      "34": false
+      "14": true,
+      "15": true,
+      "16": true,
+      "17": true,
+      "18": true,
+      "19": true,
+      "20": true,
+      "21": true,
+      "22": true,
+      "23": true,
+      "24": true,
+      "25": true,
+      "26": true,
+      "27": true,
+      "28": true,
+      "29": true,
+      "30": true,
+      "31": true,
+      "32": true,
+      "33": true,
+      "34": true,
+      "35": true,
+      "36": true,
+      "37": true,
+      "38": true,
+      "39": true,
+      "40": true,
+      "41": true,
+      "42": true,
+      "43": true,
+      "44": true,
+      "45": true,
+      "46": true,
+      "47": true,
+      "48": true,
+      "49": true,
+      "50": true,
+      "51": true,
+      "52": true,
+      "53": true,
+      "54": true,
+      "55": true,
+      "56": true,
+      "57": true,
+      "58": true,
+      "59": true,
+      "60": true,
+      "61": true,
+      "62": true,
+      "63": true,
+      "64": true,
+      "65": true,
+      "66": true,
+      "67": true,
+      "68": true,
+      "69": true,
+      "70": true,
+      "71": true,
+      "72": true,
+      "73": true,
+      "74": true,
+      "75": true,
+      "76": true,
+      "77": true,
+      "78": true,
+      "79": true,
+      "80": true,
+      "81": true,
+      "82": true,
+      "83": true,
+      "84": true,
+      "85": true,
+      "86": true,
+      "87": true,
+      "88": true,
+      "89": true,
+      "90": true,
+      "91": true,
+      "92": true,
+      "93": true,
+      "94": true,
+      "95": true,
+      "96": true,
+      "97": true,
+      "98": true,
+      "99": true,
+      "100": true,
+      "101": true,
+      "102": true,
+      "103": true,
+      "104": true,
+      "105": true,
+      "106": true,
+      "107": true
     },
-    "flags": {},
-    "elapsed": 5645,
+    "flags": {
+      "7": true,
+      "8": true,
+      "9": true,
+      "13": true,
+      "17": true,
+      "24": true,
+      "31": true,
+      "33": true,
+      "37": true,
+      "39": true,
+      "42": true,
+      "45": true,
+      "49": true,
+      "51": true,
+      "57": true,
+      "58": true,
+      "62": true,
+      "67": true,
+      "82": true,
+      "84": true,
+      "90": true,
+      "98": true
+    },
+    "elapsed": 38606,
     "paused": false,
-    "mode": "practice",
+    "mode": "retry",
     "examSubmitted": false,
     "retrySubmitted": false,
     "retryQueue": [
-      1,
-      2,
       3,
       4,
       5,
       6,
-      7,
-      8,
-      9,
       10,
       11,
-      12,
-      13,
       14,
       15,
-      16,
-      17,
       18,
-      19,
-      20,
       21,
       22,
       23,
-      24,
-      25,
-      26,
-      27,
       28,
-      29,
       30,
-      31,
       32,
-      33,
       35,
-      36,
-      37,
       38,
-      39,
-      40,
       41,
-      42,
-      43,
       44,
-      45,
-      46,
-      47,
-      48,
-      49,
-      50,
-      51,
-      52,
       53,
-      54,
-      55,
       56,
-      57,
-      58,
       59,
-      60,
       61,
-      62,
       63,
       64,
-      65,
       66,
-      67,
-      68,
       69,
       70,
       71,
-      72,
-      73,
-      74,
       75,
-      76,
-      77,
-      78,
-      79,
-      80,
-      81,
-      82,
       83,
-      84,
-      85,
       86,
       87,
       88,
       89,
-      90,
-      91,
       92,
       93,
       94,
-      95,
-      96,
       97,
-      98,
-      99,
       100,
       101,
-      102,
       103,
-      104,
       105,
       106,
-      107
+      107,
+      7,
+      8,
+      9,
+      13,
+      17,
+      24,
+      31,
+      33,
+      37,
+      39,
+      42,
+      45,
+      49,
+      51,
+      57,
+      58,
+      62,
+      67,
+      82,
+      84,
+      90,
+      98
     ],
     "retryAnswers": {},
     "retryChecked": {}
