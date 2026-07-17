@@ -79,6 +79,8 @@ test("repository documentation and portable state are AI-103-specific", () => {
   assert.match(readme, /AI-103 Mock Exam/);
   assert.match(readme, /107/);
   assert.match(readme, /tiếng Việt/);
+  assert.match(readme, /tạo danh sách từ các câu trả lời sai và câu đã đánh dấu\./);
+  assert.doesNotMatch(readme, /câu chưa hoàn thành/);
   assert.doesNotMatch(readme, /AB-100/);
   assert.deepEqual(state.state, {
     current: 0,

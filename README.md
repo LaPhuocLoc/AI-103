@@ -10,7 +10,7 @@ Mở trực tiếp `index.html` bằng trình duyệt để học trên máy cá
 
 - **Luyện tập**: kiểm tra từng câu và xem đáp án, giải thích ngay.
 - **Thi thử**: làm bài liên tục, không hiện đáp án trước khi kết thúc.
-- **Làm lại câu sai**: tạo danh sách từ các câu trả lời sai, câu chưa hoàn thành và câu đã đánh dấu.
+- **Làm lại câu sai**: tạo danh sách từ các câu trả lời sai và câu đã đánh dấu.
 
 ## Lưu và chuyển tiến độ
 
