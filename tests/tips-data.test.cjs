@@ -61,3 +61,18 @@ test("tips batch 3 covers and aligns questions 55-81", () => {
     assertAligned(AI103_QUESTIONS[id - 1], AI103_TIPS[id], AI103_MATCHING);
   }
 });
+
+test("tips batch 4 covers and aligns questions 82-107", () => {
+  const { AI103_QUESTIONS, AI103_MATCHING, AI103_TIPS } = loadData();
+  for (let id = 82; id <= 107; id++) {
+    assertTipShape(id, AI103_TIPS[id]);
+    assertAligned(AI103_QUESTIONS[id - 1], AI103_TIPS[id], AI103_MATCHING);
+  }
+});
+
+test("tip catalog exactly covers all 107 questions with clean text", () => {
+  const { AI103_QUESTIONS, AI103_TIPS } = loadData();
+  assert.equal(AI103_QUESTIONS.length, 107);
+  assert.deepEqual(Object.keys(AI103_TIPS).map(Number), Array.from({ length: 107 }, (_, index) => index + 1));
+  assert.doesNotMatch(JSON.stringify(AI103_TIPS), /Ã.|â€|Â/);
+});
