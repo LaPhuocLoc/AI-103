@@ -29,17 +29,17 @@
 
 - [ ] **Step 1: Write the failing exact-palette test**
 
-Add assertions that dark mode uses `#0b2538`, `#3aaee8`, `#d9f3ff`, `#a9d3e8`; light mode uses `#eaf7ff`, `#2583b8`, `#103b55`, `#315f78`; and `index.html` loads `styles.css?v=5`.
+Add assertions that dark mode uses `#0b2538`, `#3aaee8`, `#d9f3ff`, `#a9d3e8`; light mode uses `#eaf7ff`, `#2583b8`, `#103b55`, `#315f78`; and `index.html` loads `styles.css?v=6`.
 
 - [ ] **Step 2: Run the test to verify it fails**
 
 Run: `node --test tests/mobile-ui.test.cjs`
 
-Expected: FAIL because the current amber tokens and `styles.css?v=4` do not match.
+Expected: FAIL because the current amber tokens and `styles.css?v=5` do not match.
 
 - [ ] **Step 3: Implement the minimal palette change**
 
-Replace the four tokens in both theme blocks with the exact values above and change the stylesheet URL to `styles.css?v=5`.
+Replace the four tokens in both theme blocks with the exact values above and change the stylesheet URL to `styles.css?v=6`.
 
 - [ ] **Step 4: Run focused and full verification**
 

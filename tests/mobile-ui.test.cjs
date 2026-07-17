@@ -104,6 +104,29 @@ test("tip colors meet WCAG AA contrast in both themes", () => {
   assert.match(css, /\.tip-panel\s*\{[^}]*background:\s*var\(--tip-surface\)[^}]*border:\s*1px solid var\(--tip-border\)/);
 });
 
+test("tip components use the exact cool Azure blue palette", () => {
+  const tipKeys = ["--tip-surface", "--tip-border", "--tip-foreground", "--tip-muted"];
+  assert.deepEqual(
+    Object.fromEntries(tipKeys.map((key) => [key, tokensFor(":root")[key]])),
+    {
+      "--tip-surface": "#0b2538",
+      "--tip-border": "#3aaee8",
+      "--tip-foreground": "#d9f3ff",
+      "--tip-muted": "#a9d3e8"
+    }
+  );
+  assert.deepEqual(
+    Object.fromEntries(tipKeys.map((key) => [key, tokensFor(':root[data-theme="light"]')[key]])),
+    {
+      "--tip-surface": "#eaf7ff",
+      "--tip-border": "#2583b8",
+      "--tip-foreground": "#103b55",
+      "--tip-muted": "#315f78"
+    }
+  );
+  assert.match(html, /styles\.css\?v=6/);
+});
+
 test("small accent text has WCAG AA contrast in both themes", () => {
   const dark = tokensFor(":root");
   const light = tokensFor(':root[data-theme="light"]');
