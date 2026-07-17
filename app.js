@@ -29,6 +29,7 @@
     paused: false,
     mode: "practice",
     examSubmitted: false,
+    retrySubmitted: false,
     retryQueue: [],
     retryAnswers: {},
     retryChecked: {}
@@ -39,7 +40,6 @@
   let lastTick = Date.now();
   let activeDragOption = null;
   let pointerDragState = null;
-  let retrySubmitted = false;
 
   function applyTheme(theme) {
     document.documentElement.dataset.theme = theme;
@@ -102,6 +102,7 @@
       paused: Boolean(raw.paused),
       mode,
       examSubmitted: Boolean(raw.examSubmitted),
+      retrySubmitted: mode === "retry" && Boolean(raw.retrySubmitted),
       retryQueue: validRetryIds,
       retryAnswers: normalizeAnswers(raw.retryAnswers),
       retryChecked: normalizeBooleanMap(raw.retryChecked)
@@ -543,7 +544,6 @@
   }
 
   function enterRetryMode() {
-    retrySubmitted = false;
     const previousMode = state.mode;
     const existingQueue = Array.isArray(state.retryQueue) ? state.retryQueue : [];
     const retryAnswers = state.retryAnswers || (state.retryAnswers = {});
@@ -572,6 +572,7 @@
     });
 
     state.retryQueue = retryQueue;
+    state.retrySubmitted = false;
     state.mode = "retry";
     const firstIndex = questions.findIndex((q) => q.id === retryQueue[0]);
     if (firstIndex >= 0) state.current = firstIndex;
@@ -586,7 +587,7 @@
       return;
     }
     if (mode === "exam" && state.mode !== "exam") state.examSubmitted = false;
-    retrySubmitted = false;
+    state.retrySubmitted = false;
     state.mode = mode;
     els.mode.value = mode;
     saveState();
@@ -596,7 +597,7 @@
   function updateStats() {
     const scope = scopedQuestions();
     const done = scope.filter((q) => answered(q)).length;
-    const submitted = (state.mode === "exam" && state.examSubmitted) || (state.mode === "retry" && retrySubmitted);
+    const submitted = (state.mode === "exam" && state.examSubmitted) || (state.mode === "retry" && state.retrySubmitted);
     const graded = scope.filter((q) => isGradable(q) && (submitted || answered(q)));
     const correct = graded.filter((q) => answered(q) && isCorrect(q)).length;
     els.progressText.textContent = `${done} / ${scope.length}`;
@@ -610,8 +611,8 @@
       state.examSubmitted = true;
       submissionChanged = true;
     }
-    if (state.mode === "retry" && !retrySubmitted) {
-      retrySubmitted = true;
+    if (state.mode === "retry" && !state.retrySubmitted) {
+      state.retrySubmitted = true;
       submissionChanged = true;
     }
     if (submissionChanged) { saveState(); renderQuestion(); }

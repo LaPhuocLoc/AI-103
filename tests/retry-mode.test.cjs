@@ -261,7 +261,7 @@ test("export handler downloads the current AI-103 state without touching AB-100 
 
   assert.equal(download.filename, "ai103-progress-state.json");
   assert.equal(download.payload.schemaVersion, 1);
-  assert.deepEqual(download.payload.state, { ...initialState, examSubmitted: false });
+  assert.deepEqual(download.payload.state, { ...initialState, examSubmitted: false, retrySubmitted: false });
   assert.equal(app.rawStorage("ab100-mock-state-v1"), serializedAbState);
 });
 
@@ -291,6 +291,7 @@ test("committed load handler fetches, normalizes, persists, and renders AI-103 s
   assert.deepEqual(app.state(), {
     ...committedPayload.state,
     examSubmitted: false,
+    retrySubmitted: false,
     retryQueue: [],
     retryAnswers: {},
     retryChecked: {}
@@ -367,7 +368,7 @@ test("submitted exam scores all gradable questions and marks unanswered as incom
   assert.match(unansweredNav.children[0].textContent, /○/);
 });
 
-test("submitted retry scores all gradable questions in retry scope", () => {
+test("submitted retry score persists through export and local restore", async () => {
   const questions = [
     { id: 1, stem: "One", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
     { id: 2, stem: "Two", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false }
@@ -382,6 +383,49 @@ test("submitted retry scores all gradable questions in retry scope", () => {
   assert.equal(app.text("scoreText"), "1 / 2");
   assert.equal(app.text("resultScore"), "50%");
   assert.match(app.text("resultCopy"), /Đúng 1\/2 câu có thể chấm tự động/);
+  const download = await app.exportProgress();
+  assert.equal(download.payload.state.retrySubmitted, true);
+
+  const restored = bootApp(download.payload.state, { questions });
+  assert.equal(restored.state().retrySubmitted, true);
+  assert.equal(restored.text("scoreText"), "1 / 2");
+});
+
+test("committed retry submission restores full denominator", async () => {
+  const questions = [
+    { id: 1, stem: "One", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
+    { id: 2, stem: "Two", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false }
+  ];
+  const committedPayload = { state: {
+    current: 0, answers: {}, checked: {}, flags: {}, elapsed: 0, paused: false, mode: "retry",
+    retryQueue: [1, 2], retryAnswers: { 1: ["B"] }, retryChecked: {}, retrySubmitted: true
+  } };
+  const app = bootApp({ current: 0 }, { questions, committedPayload });
+
+  await app.loadCommittedProgress();
+
+  assert.equal(app.state().retrySubmitted, true);
+  assert.equal(app.text("scoreText"), "1 / 2");
+});
+
+test("loading a non-submitted retry clears prior submitted scoring", async () => {
+  const questions = [
+    { id: 1, stem: "One", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
+    { id: 2, stem: "Two", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false }
+  ];
+  const initial = {
+    current: 0, answers: {}, checked: {}, flags: {}, elapsed: 0, paused: false, mode: "retry",
+    retryQueue: [1, 2], retryAnswers: { 1: ["B"] }, retryChecked: {}
+  };
+  const committedPayload = { state: { ...initial, retrySubmitted: false } };
+  const app = bootApp(initial, { questions, committedPayload });
+  app.finish();
+  assert.equal(app.text("scoreText"), "1 / 2");
+
+  await app.loadCommittedProgress();
+
+  assert.equal(app.state().retrySubmitted, false);
+  assert.equal(app.text("scoreText"), "1 / 1");
 });
 
 test("fresh retry includes incorrect, incomplete, and flagged questions", () => {
@@ -430,7 +474,7 @@ test("normalization rejects malformed question keyed state and repairs retry sco
   assert.deepEqual(app.state(), {
     current: 1, answers: { 1: ["B"], 2: { 0: "Y" } }, checked: { 1: true }, flags: { 2: false },
     elapsed: 5, paused: false, mode: "retry", retryQueue: [2], retryAnswers: {}, retryChecked: { 2: true },
-    examSubmitted: false
+    examSubmitted: false, retrySubmitted: false
   });
 });
 
