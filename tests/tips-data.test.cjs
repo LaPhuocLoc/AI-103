@@ -26,8 +26,8 @@ function assertGuideShape(question, guide, matching) {
     assert.match(source, /^https:\/\/learn\.microsoft\.com\//, `Q${question.id} source must be Microsoft Learn`);
   }
   const expectedKeys = question.choices.length
-    ? question.choices.map((choice) => choice.label)
-    : matching[question.id].map((group) => group.prompt);
+    ? Array.from(question.choices, (choice) => choice.label)
+    : Array.from(matching[question.id], (group) => group.prompt);
   assert.deepEqual(Object.keys(guide.trapNotes), expectedKeys, `Q${question.id} trapNotes keys`);
   for (const key of expectedKeys) {
     assert.ok(guide.trapNotes[key]?.trim().length >= 25, `Q${question.id} trap note ${key} is too shallow`);
@@ -97,13 +97,7 @@ test("tip catalog exactly covers all 107 questions with clean text", () => {
   const { AI103_QUESTIONS, AI103_TIPS } = loadData();
   assert.equal(AI103_QUESTIONS.length, 107);
   assert.deepEqual(Object.keys(AI103_TIPS).map(Number), Array.from({ length: 107 }, (_, index) => index + 1));
-  assert.doesNotMatch(JSON.stringify(AI103_TIPS), /Ã.|â€|Â/);
-});
-
-test("multi-line source explanations stay intact in choice traps", () => {
-  const { AI103_TIPS } = loadData();
-  assert.match(AI103_TIPS[1].traps.find((trap) => trap.label === "B").text, /live transcripts, not translations/);
-  assert.match(AI103_TIPS[1].traps.find((trap) => trap.label === "D").text, /ideal for live scenarios/);
+  assert.doesNotMatch(JSON.stringify(AI103_TIPS), /Ã[\u0080-\u00bf]|â(?:€|™|†|œ|€¦)|Â /);
 });
 
 test("all 107 tips use fully authored Vietnamese learning guides", () => {
@@ -111,4 +105,32 @@ test("all 107 tips use fully authored Vietnamese learning guides", () => {
   assert.equal(typeof AI103_TIP_GUIDES, "object", "authored guide catalog is missing");
   assert.deepEqual(Object.keys(AI103_TIP_GUIDES).map(Number), Array.from({ length: 107 }, (_, index) => index + 1));
   for (const question of AI103_QUESTIONS) assertGuideShape(question, AI103_TIP_GUIDES[question.id], AI103_MATCHING);
+});
+
+test("authored guides are concise, Vietnamese, distinct, and used verbatim", () => {
+  const { AI103_QUESTIONS, AI103_TIP_GUIDES, AI103_TIPS } = loadData();
+  const vietnamese = /[ăâđêôơưáàảãạấầẩẫậắằẳẵặéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ]/i;
+  const keywords = new Set();
+  const mnemonics = new Set();
+  for (const question of AI103_QUESTIONS) {
+    const guide = AI103_TIP_GUIDES[question.id];
+    assert.ok(vietnamese.test(guide.keywords), `Q${question.id} keywords need natural Vietnamese`);
+    assert.ok(vietnamese.test(guide.mnemonic), `Q${question.id} mnemonic needs natural Vietnamese`);
+    assert.ok(guide.keywords.length <= 160, `Q${question.id} keywords are too long`);
+    assert.ok(guide.mnemonic.length <= 240, `Q${question.id} mnemonic is too long`);
+    assert.equal(keywords.has(guide.keywords), false, `Q${question.id} duplicates another keyword set`);
+    assert.equal(mnemonics.has(guide.mnemonic), false, `Q${question.id} duplicates another mnemonic`);
+    keywords.add(guide.keywords);
+    mnemonics.add(guide.mnemonic);
+    for (const note of Object.values(guide.trapNotes)) {
+      assert.ok(vietnamese.test(note), `Q${question.id} trap note needs Vietnamese explanation`);
+      assert.doesNotMatch(note, /không đáp ứng trực tiếp tín hiệu quyết định/i, `Q${question.id} uses a generic trap`);
+    }
+    assert.deepEqual(
+      Array.from(AI103_TIPS[question.id].traps, (trap) => [trap.label, trap.text]),
+      Object.entries(guide.trapNotes),
+      `Q${question.id} must render authored traps verbatim`
+    );
+    assert.equal(AI103_TIPS[question.id].ultraShort, guide.ultraShort, `Q${question.id} must render authored ultraShort`);
+  }
 });
