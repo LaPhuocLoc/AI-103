@@ -28,12 +28,14 @@
     elapsed: 0,
     paused: false,
     mode: "practice",
+    examSubmitted: false,
     retryQueue: [],
     retryAnswers: {},
     retryChecked: {}
   });
   const hadLocalState = localStorage.getItem(STORAGE_KEY) !== null;
   let state = loadState();
+  if (hadLocalState) saveState();
   let lastTick = Date.now();
   let activeDragOption = null;
   let pointerDragState = null;
@@ -53,25 +55,58 @@
     const raw = value && typeof value === "object" ? value : {};
     const objectOrEmpty = (candidate) => candidate && typeof candidate === "object" && !Array.isArray(candidate) ? candidate : {};
     const allowedModes = new Set(["practice", "exam", "retry"]);
+    const questionById = new Map(questions.map((q) => [q.id, q]));
+    const isCanonicalQuestionKey = (id) => String(Number(id)) === id && questionById.has(Number(id));
+    const normalizeBooleanMap = (candidate) => Object.fromEntries(
+      Object.entries(objectOrEmpty(candidate))
+        .filter(([id]) => isCanonicalQuestionKey(id))
+        .map(([id, item]) => [id, Boolean(item)])
+    );
+    const normalizeAnswers = (candidate) => Object.fromEntries(
+      Object.entries(objectOrEmpty(candidate)).flatMap(([id, item]) => {
+        if (!isCanonicalQuestionKey(id)) return [];
+        const q = questionById.get(Number(id));
+        const groups = matchingData[q.id];
+        if (groups) {
+          const normalized = Object.fromEntries(Object.entries(objectOrEmpty(item)).filter(([index, option]) => {
+            const groupIndex = Number(index);
+            return Number.isInteger(groupIndex) && String(groupIndex) === index && groupIndex >= 0 &&
+              groupIndex < groups.length && groups[groupIndex].options.includes(option);
+          }));
+          return Object.keys(normalized).length ? [[id, normalized]] : [];
+        }
+        if (!q.gradable || !Array.isArray(item)) return [];
+        const labels = new Set(q.choices.map((choice) => choice.label));
+        const normalized = [...new Set(item.filter((label) => labels.has(label)))];
+        return normalized.length ? [[id, normalized]] : [];
+      })
+    );
+    const validRetryIds = [...new Set(
+      (Array.isArray(raw.retryQueue) ? raw.retryQueue : [])
+        .filter((id) => Number.isInteger(id) && questionById.has(id))
+    )];
+    let mode = allowedModes.has(raw.mode) ? raw.mode : "practice";
+    if (mode === "retry" && !validRetryIds.length) mode = "practice";
+    let current = Number.isInteger(raw.current) ? Math.max(0, Math.min(raw.current, Math.max(questions.length - 1, 0))) : 0;
+    if (mode === "retry" && !validRetryIds.includes(questions[current]?.id)) {
+      current = questions.findIndex((q) => q.id === validRetryIds[0]);
+    }
     return {
       ...blankState(),
-      current: Number.isInteger(raw.current) ? Math.max(0, Math.min(raw.current, Math.max(questions.length - 1, 0))) : 0,
-      answers: objectOrEmpty(raw.answers),
-      checked: objectOrEmpty(raw.checked),
-      flags: objectOrEmpty(raw.flags),
+      current,
+      answers: normalizeAnswers(raw.answers),
+      checked: normalizeBooleanMap(raw.checked),
+      flags: normalizeBooleanMap(raw.flags),
       elapsed: Number.isFinite(raw.elapsed) && raw.elapsed >= 0 ? raw.elapsed : 0,
       paused: Boolean(raw.paused),
-      mode: allowedModes.has(raw.mode) ? raw.mode : "practice",
-      retryQueue: Array.isArray(raw.retryQueue) ? raw.retryQueue.filter((id) => Number.isInteger(id)) : [],
-      retryAnswers: objectOrEmpty(raw.retryAnswers),
-      retryChecked: objectOrEmpty(raw.retryChecked)
+      mode,
+      examSubmitted: Boolean(raw.examSubmitted),
+      retryQueue: validRetryIds,
+      retryAnswers: normalizeAnswers(raw.retryAnswers),
+      retryChecked: normalizeBooleanMap(raw.retryChecked)
     };
   }
   function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-  function hasMeaningfulProgress(value) {
-    return [value.answers, value.checked, value.flags, value.retryAnswers, value.retryChecked]
-      .some((group) => Object.keys(group || {}).length > 0) || value.retryQueue.length > 0;
-  }
   function setSyncStatus(message) { els.syncStatus.textContent = message; }
   function exportProgress() {
     saveState();
@@ -146,10 +181,28 @@
       button.className = "nav-item";
       button.textContent = q.id;
       button.title = `Câu ${q.id}`;
-      if (index === state.current) button.classList.add("active");
-      if (answered(q)) button.classList.add("answered");
-      if (checked[q.id] && isGradable(q)) button.classList.add(isCorrect(q) ? "correct" : "wrong");
-      if (state.flags[q.id]) button.classList.add("flagged");
+      const isActive = index === state.current;
+      const isAnswered = answered(q);
+      const correctnessVisible = isGradable(q) && (state.mode === "exam" ? state.examSubmitted : checked[q.id]);
+      const isRight = correctnessVisible && isAnswered && isCorrect(q);
+      const isWrong = correctnessVisible && !isRight;
+      const isFlagged = Boolean(state.flags[q.id]);
+      if (isActive) {
+        button.classList.add("active");
+        button.setAttribute("aria-current", "question");
+      }
+      if (isAnswered) button.classList.add("answered");
+      if (isRight) button.classList.add("correct");
+      if (isWrong) button.classList.add("wrong");
+      if (isFlagged) button.classList.add("flagged");
+      const states = [isActive && "hiện tại", isAnswered ? "đã trả lời" : "chưa trả lời",
+        isRight && "đúng", isWrong && "sai", isFlagged && "đã đánh dấu"].filter(Boolean);
+      button.setAttribute("aria-label", `Câu ${q.id}: ${states.join(", ")}`);
+      const marker = document.createElement("span");
+      marker.className = "nav-state-marker";
+      marker.setAttribute("aria-hidden", "true");
+      marker.textContent = [isActive && "›", isAnswered && "●", isRight && "✓", isWrong && "×", isFlagged && "★"].filter(Boolean).join("");
+      button.appendChild(marker);
       button.addEventListener("click", () => goTo(index));
       els.grid.appendChild(button);
     });
@@ -161,7 +214,7 @@
     const groups = matching(q);
     const dragMode = Boolean(groups && isDragQuestion(q));
     const checked = checkedStore();
-    const reveal = Boolean(checked[q.id]) && state.mode !== "exam";
+    const reveal = state.mode === "exam" ? state.examSubmitted : Boolean(checked[q.id]);
     const scope = scopedQuestions();
     const position = scopedPosition();
     els.number.textContent = state.mode === "retry"
@@ -399,7 +452,7 @@
 
   function renderAnswer(reveal) {
     const q = currentQuestion();
-    const show = state.mode !== "exam" && checkedStore()[q.id];
+    const show = state.mode === "exam" ? state.examSubmitted : Boolean(checkedStore()[q.id]);
     els.answerCard.hidden = !show;
     if (!show) return;
     els.answerStatus.textContent = isGradable(q) ? (isCorrect(q) ? "Chính xác" : "Đáp án đúng") : "Đáp án tham khảo";
@@ -415,7 +468,7 @@
   function choose(q, label) {
     const checked = checkedStore();
     const answers = answerStore();
-    if (checked[q.id] && state.mode !== "exam") return;
+    if ((checked[q.id] && state.mode !== "exam") || (state.mode === "exam" && state.examSubmitted)) return;
     let values = selected(q.id).slice();
     if (q.multiple) values = values.includes(label) ? values.filter((x) => x !== label) : [...values, label];
     else values = [label];
@@ -427,7 +480,7 @@
   function chooseMatching(q, groupIndex, option) {
     const checked = checkedStore();
     const answers = answerStore();
-    if (checked[q.id] && state.mode !== "exam") return;
+    if ((checked[q.id] && state.mode !== "exam") || (state.mode === "exam" && state.examSubmitted)) return;
     answers[q.id] = { ...matchingSelected(q.id), [groupIndex]: option };
     saveState();
     renderQuestion();
@@ -468,10 +521,13 @@
   }
 
   function setSidebarOpen(open) {
+    const wasOpen = els.sidebar.classList.contains("open");
     els.sidebar.classList.toggle("open", open);
     els.sidebarBackdrop.classList.toggle("open", open);
     document.body.classList.toggle("sidebar-open", open);
     els.menu.setAttribute("aria-expanded", String(open));
+    if (open && !wasOpen) els.sidebarClose.focus();
+    if (!open && wasOpen) els.menu.focus();
   }
 
   function goRelative(offset) {
@@ -481,10 +537,6 @@
     const target = scope[Math.max(0, Math.min(position + offset, scope.length - 1))];
     const index = questions.findIndex((q) => q.id === target.id);
     if (index >= 0) goTo(index);
-  }
-
-  function wrongAnsweredQuestions() {
-    return questions.filter((q) => isGradable(q) && answered(q, state.answers, state.checked) && !isCorrect(q, state.answers));
   }
 
   function enterRetryMode() {
@@ -497,13 +549,15 @@
       return q && (!answered(q, retryAnswers, retryChecked) || !isCorrect(q, retryAnswers));
     });
     const unfinishedIds = new Set(unfinishedExisting);
-    const wrongIds = wrongAnsweredQuestions().map((q) => q.id);
+    const incorrectOrIncompleteIds = questions
+      .filter((q) => !answered(q, state.answers, state.checked) || (isGradable(q) && !isCorrect(q, state.answers)))
+      .map((q) => q.id);
     const flaggedIds = questions.filter((q) => Boolean(state.flags[q.id])).map((q) => q.id);
-    const retryQueue = [...new Set([...unfinishedExisting, ...wrongIds, ...flaggedIds])];
+    const retryQueue = [...new Set([...unfinishedExisting, ...incorrectOrIncompleteIds, ...flaggedIds])];
 
     if (!retryQueue.length) {
       els.mode.value = previousMode;
-      alert("Chưa có câu sai hoặc câu được đánh dấu để làm lại.");
+      alert("Chưa có câu sai, chưa hoàn thành hoặc được đánh dấu để làm lại.");
       return;
     }
 
@@ -527,6 +581,7 @@
       enterRetryMode();
       return;
     }
+    if (mode === "exam" && state.mode !== "exam") state.examSubmitted = false;
     state.mode = mode;
     els.mode.value = mode;
     saveState();
@@ -540,17 +595,22 @@
     const correct = graded.filter((q) => isCorrect(q)).length;
     els.progressText.textContent = `${done} / ${scope.length}`;
     els.progressBar.style.width = `${scope.length ? done / scope.length * 100 : 0}%`;
-    els.scoreText.textContent = `${correct} / ${graded.length}`;
+    els.scoreText.textContent = state.mode === "exam" && !state.examSubmitted ? "—" : `${correct} / ${graded.length}`;
   }
 
   function showResults() {
+    if (state.mode === "exam" && !state.examSubmitted) {
+      state.examSubmitted = true;
+      saveState();
+      renderQuestion();
+    }
     const scope = scopedQuestions();
     const graded = scope.filter((q) => isGradable(q) && answered(q));
     const correct = graded.filter((q) => isCorrect(q)).length;
     const percent = graded.length ? Math.round(correct / graded.length * 100) : 0;
     els.resultScore.textContent = `${percent}%`;
     els.resultCopy.textContent = state.mode === "retry"
-      ? `Đúng ${correct}/${graded.length} câu đã trả lời. Đã làm lại ${scope.filter((q) => answered(q)).length}/${scope.length} câu sai hoặc được đánh dấu.`
+      ? `Đúng ${correct}/${graded.length} câu đã trả lời. Đã làm lại ${scope.filter((q) => answered(q)).length}/${scope.length} câu sai, chưa hoàn thành hoặc được đánh dấu.`
       : `Đúng ${correct}/${graded.length} câu có thể chấm tự động. Đã xử lý ${scope.filter((q) => answered(q)).length}/${scope.length} câu toàn bộ đề.`;
     els.dialog.showModal();
   }
@@ -609,5 +669,5 @@
   applyTheme(document.documentElement.dataset.theme || "dark");
   tick();
   renderQuestion();
-  if (!hadLocalState || !hasMeaningfulProgress(state)) loadCommittedProgress();
+  if (!hadLocalState) loadCommittedProgress();
 })();

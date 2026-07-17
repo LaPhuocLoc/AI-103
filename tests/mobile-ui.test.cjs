@@ -50,6 +50,11 @@ test("mobile breakpoint keeps the exam mode selector visible", () => {
   assert.match(css, /@media \(max-width: 620px\)[\s\S]*\.mode-switch\s*\{\s*display:\s*block/);
 });
 
+test("question navigation includes visible state-marker styling", () => {
+  assert.match(css, /\.nav-state-marker/);
+  assert.match(css, /\.nav-item\.active[^}]*outline/);
+});
+
 test("document is branded and linked for AI-103 only", () => {
   assert.match(html, /<title>AI-103 Mock Exam<\/title>/);
   assert.match(html, /Azure AI Apps and Agents Developer Associate/);

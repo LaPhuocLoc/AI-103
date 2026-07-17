@@ -9,23 +9,42 @@ class ElementStub {
     this.listeners = {};
     this.dataset = {};
     this.style = {};
-    this.classList = { add() {}, remove() {}, toggle() {} };
+    this.children = [];
+    this.attributes = {};
+    this._innerHTML = "";
+    this.classNames = new Set();
+    this.classList = {
+      add: (...names) => names.forEach((name) => this.classNames.add(name)),
+      remove: (...names) => names.forEach((name) => this.classNames.delete(name)),
+      toggle: (name, force) => {
+        const enabled = force === undefined ? !this.classNames.has(name) : Boolean(force);
+        if (enabled) this.classNames.add(name); else this.classNames.delete(name);
+        return enabled;
+      },
+      contains: (name) => this.classNames.has(name)
+    };
     this.value = "";
     this.textContent = "";
     this.hidden = false;
   }
 
   addEventListener(type, listener) { this.listeners[type] = listener; }
-  appendChild() {}
-  append() {}
-  setAttribute() {}
+  appendChild(child) { this.children.push(child); return child; }
+  append(...children) { this.children.push(...children); }
+  setAttribute(name, value) { this.attributes[name] = String(value); }
+  getAttribute(name) { return this.attributes[name]; }
+  set innerHTML(value) { this._innerHTML = value; this.children = []; }
+  get innerHTML() { return this._innerHTML; }
+  focus() { ElementStub.focused = this; }
   animate() {}
   scrollIntoView() {}
   showModal() {}
   close() {}
 }
 
-function bootApp(initialState, { abState = { current: 99 }, committedPayload } = {}) {
+function bootApp(initialState, {
+  abState = { current: 99 }, committedPayload, questions, matchingData = {}, dragIds = []
+} = {}) {
   const ids = [
     "questionGrid", "questionNumber", "typePill", "questionStem", "choices", "manualNote",
     "answerCard", "answerStatus", "correctAnswer", "explanationText", "pageLink", "prevButton",
@@ -43,6 +62,7 @@ function bootApp(initialState, { abState = { current: 99 }, committedPayload } =
   const blobs = new Map();
   let nextBlobId = 1;
   let lastFetchRequest = null;
+  let fetchCount = 0;
   if (initialState !== undefined) storage.set("ai103-mock-state-v1", JSON.stringify(initialState));
   const localStorage = {
     getItem(key) { return storage.has(key) ? storage.get(key) : null; },
@@ -64,8 +84,7 @@ function bootApp(initialState, { abState = { current: 99 }, committedPayload } =
     addEventListener() {},
     elementFromPoint() { return null; }
   };
-  const window = {
-    AI103_QUESTIONS: [{
+  const defaultQuestions = [{
       id: 1,
       stem: "Question",
       choices: [{ label: "A", text: "Wrong" }, { label: "B", text: "Correct" }],
@@ -75,9 +94,11 @@ function bootApp(initialState, { abState = { current: 99 }, committedPayload } =
       sourcePages: [1],
       gradable: true,
       multiple: false
-    }],
-    AI103_MATCHING: {},
-    AI103_DRAG_IDS: [],
+    }];
+  const window = {
+    AI103_QUESTIONS: questions || defaultQuestions,
+    AI103_MATCHING: matchingData,
+    AI103_DRAG_IDS: dragIds,
     scrollTo() {}
   };
   const context = vm.createContext({
@@ -98,8 +119,9 @@ function bootApp(initialState, { abState = { current: 99 }, committedPayload } =
       revokeObjectURL() {}
     },
     async fetch(url, options) {
-      if (committedPayload === undefined) throw new Error("No committed payload configured");
+      fetchCount += 1;
       lastFetchRequest = { url, options };
+      if (committedPayload === undefined) throw new Error("No committed payload configured");
       return {
         ok: true,
         async json() { return committedPayload; }
@@ -130,6 +152,13 @@ function bootApp(initialState, { abState = { current: 99 }, committedPayload } =
       await new Promise((resolve) => setImmediate(resolve));
     },
     fetchRequest() { return lastFetchRequest; }
+    ,fetchCount() { return fetchCount; }
+    ,finish() { elements.get("finishButton").listeners.click(); }
+    ,reviewWrong() { elements.get("reviewWrong").listeners.click(); }
+    ,clickMenu() { elements.get("menuButton").listeners.click(); }
+    ,closeSidebar() { elements.get("sidebarClose").listeners.click(); }
+    ,element(id) { return elements.get(id); }
+    ,focusedId() { return ElementStub.focused?.id || ""; }
   };
 }
 
@@ -232,7 +261,7 @@ test("export handler downloads the current AI-103 state without touching AB-100 
 
   assert.equal(download.filename, "ai103-progress-state.json");
   assert.equal(download.payload.schemaVersion, 1);
-  assert.deepEqual(download.payload.state, initialState);
+  assert.deepEqual(download.payload.state, { ...initialState, examSubmitted: false });
   assert.equal(app.rawStorage("ab100-mock-state-v1"), serializedAbState);
 });
 
@@ -261,11 +290,123 @@ test("committed load handler fetches, normalizes, persists, and renders AI-103 s
   assert.deepEqual(Object.keys(app.fetchRequest().options), ["cache"]);
   assert.deepEqual(app.state(), {
     ...committedPayload.state,
+    examSubmitted: false,
     retryQueue: [],
     retryAnswers: {},
     retryChecked: {}
   });
   assert.equal(app.text("progressText"), "1 / 1");
-  assert.equal(app.text("scoreText"), "1 / 1");
+  assert.equal(app.text("scoreText"), "—");
   assert.equal(app.rawStorage("ab100-mock-state-v1"), serializedAbState);
+});
+
+test("exam mode conceals score and correctness until submission, then enables review", () => {
+  const app = bootApp({
+    current: 0, answers: { 1: ["A"] }, checked: { 1: true }, flags: {}, elapsed: 0,
+    paused: false, mode: "exam", retryQueue: [], retryAnswers: {}, retryChecked: {}
+  });
+
+  assert.equal(app.text("scoreText"), "—");
+  assert.equal(app.element("answerCard").hidden, true);
+  assert.equal(app.element("questionGrid").children[0].classNames.has("wrong"), false);
+
+  app.finish();
+
+  assert.equal(app.state().examSubmitted, true);
+  assert.equal(app.text("scoreText"), "0 / 1");
+  assert.equal(app.element("questionGrid").children[0].classNames.has("wrong"), true);
+  app.reviewWrong();
+  assert.equal(app.element("answerCard").hidden, false);
+  assert.match(app.text("correctAnswer"), /B/);
+});
+
+test("exam submission reveals matching grading only after submission", () => {
+  const questions = [{ id: 1, stem: "Match", choices: [], correct: [], answer: "", explanation: "Why", sourcePages: [2], gradable: false, multiple: false }];
+  const matchingData = { 1: [{ prompt: "Service", options: ["A", "B"], correct: "B" }] };
+  const app = bootApp({
+    current: 0, answers: { 1: { 0: "A" } }, checked: {}, flags: {}, elapsed: 0,
+    paused: false, mode: "exam", retryQueue: [], retryAnswers: {}, retryChecked: {}
+  }, { questions, matchingData });
+
+  assert.equal(app.text("scoreText"), "—");
+  assert.equal(app.element("questionGrid").children[0].classNames.has("wrong"), false);
+  app.finish();
+  assert.equal(app.text("scoreText"), "0 / 1");
+  assert.equal(app.element("answerCard").hidden, false);
+});
+
+test("fresh retry includes incorrect, incomplete, and flagged questions", () => {
+  const questions = [
+    { id: 1, stem: "One", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
+    { id: 2, stem: "Two", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
+    { id: 3, stem: "Three", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false }
+  ];
+  const app = bootApp({
+    current: 0, answers: { 1: ["A"], 3: ["B"] }, checked: { 1: true, 3: true }, flags: { 3: true },
+    elapsed: 0, paused: false, mode: "practice", retryQueue: [], retryAnswers: {}, retryChecked: {}
+  }, { questions });
+
+  app.changeMode("retry");
+  assert.deepEqual(app.state().retryQueue, [1, 2, 3]);
+  app.finish();
+  assert.match(app.text("resultCopy"), /chưa hoàn thành/);
+});
+
+test("an existing navigation/timer/mode-only local state prevents automatic committed fetch", () => {
+  const app = bootApp({
+    current: 0, answers: {}, checked: {}, flags: {}, elapsed: 34, paused: true,
+    mode: "exam", retryQueue: [], retryAnswers: {}, retryChecked: {}
+  }, { committedPayload: { state: { answers: { 1: ["B"] } } } });
+
+  assert.equal(app.fetchCount(), 0);
+  assert.equal(app.state().elapsed, 34);
+  assert.equal(app.state().paused, true);
+  assert.equal(app.state().mode, "exam");
+});
+
+test("normalization rejects malformed question keyed state and repairs retry scope", () => {
+  const questions = [
+    { id: 1, stem: "One", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
+    { id: 2, stem: "Match", choices: [], correct: [], answer: "", explanation: "", sourcePages: [2], gradable: false, multiple: false }
+  ];
+  const matchingData = { 2: [{ prompt: "First", options: ["X", "Y"], correct: "X" }] };
+  const app = bootApp({
+    current: 0,
+    answers: { 1: ["B", "B", "Z"], 2: { 0: "Y", 1: "X" }, "01": ["A"], 999: ["A"] },
+    checked: { 1: 1, "01": true, 999: true }, flags: { 2: "", 999: true },
+    elapsed: 5, paused: 0, mode: "retry", retryQueue: [2, 2, 999],
+    retryAnswers: { 2: { 0: "INVALID" }, 999: ["A"] }, retryChecked: { 2: "yes", 999: true }
+  }, { questions, matchingData });
+
+  assert.deepEqual(app.state(), {
+    current: 1, answers: { 1: ["B"], 2: { 0: "Y" } }, checked: { 1: true }, flags: { 2: false },
+    elapsed: 5, paused: false, mode: "retry", retryQueue: [2], retryAnswers: {}, retryChecked: { 2: true },
+    examSubmitted: false
+  });
+});
+
+test("empty normalized retry scope falls back to practice", () => {
+  const app = bootApp({ mode: "retry", current: 0, retryQueue: [999, 999] });
+  assert.equal(app.state().mode, "practice");
+  assert.deepEqual(app.state().retryQueue, []);
+});
+
+test("navigation exposes non-color markers and Vietnamese state labels", () => {
+  const app = bootApp({
+    current: 0, answers: { 1: ["B"] }, checked: { 1: true }, flags: { 1: true }, elapsed: 0,
+    paused: false, mode: "practice", retryQueue: [], retryAnswers: {}, retryChecked: {}
+  });
+  const nav = app.element("questionGrid").children[0];
+  assert.equal(nav.getAttribute("aria-current"), "question");
+  assert.match(nav.getAttribute("aria-label"), /Câu 1.*hiện tại.*đã trả lời.*đúng.*đánh dấu/i);
+  assert.match(String(nav.textContent), /1/);
+  assert.ok(nav.children.length > 0, "navigation needs visible state markers, not color alone");
+});
+
+test("mobile drawer moves focus on open and restores it on close", () => {
+  const app = bootApp({ current: 0 });
+  app.clickMenu();
+  assert.equal(app.focusedId(), "sidebarClose");
+  app.closeSidebar();
+  assert.equal(app.focusedId(), "menuButton");
 });
