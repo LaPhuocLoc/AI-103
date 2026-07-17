@@ -53,3 +53,11 @@ test("tips batch 2 covers and aligns questions 28-54", () => {
     assertAligned(AI103_QUESTIONS[id - 1], AI103_TIPS[id], AI103_MATCHING);
   }
 });
+
+test("tips batch 3 covers and aligns questions 55-81", () => {
+  const { AI103_QUESTIONS, AI103_MATCHING, AI103_TIPS } = loadData();
+  for (let id = 55; id <= 81; id++) {
+    assertTipShape(id, AI103_TIPS[id]);
+    assertAligned(AI103_QUESTIONS[id - 1], AI103_TIPS[id], AI103_MATCHING);
+  }
+});
