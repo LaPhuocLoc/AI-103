@@ -48,7 +48,8 @@ function bootApp(initialState, {
   const ids = [
     "questionGrid", "questionNumber", "typePill", "questionStem", "choices", "manualNote",
     "answerCard", "answerStatus", "correctAnswer", "explanationText", "pageLink", "prevButton",
-    "nextButton", "checkButton", "flagButton", "progressText", "progressBar", "scoreText", "timer",
+    "nextButton", "checkButton", "flagButton", "tipButton", "tipPanel", "tipKeywords", "tipAnswer",
+    "tipMnemonic", "tipTraps", "tipUltraShort", "progressText", "progressBar", "scoreText", "timer",
     "timerToggle", "modeSelect", "finishButton", "clearProgress", "themeToggle", "exportProgress",
     "loadProgress", "syncStatus", "sidebarClose", "sidebarBackdrop", "resultDialog",
     "resultScore", "resultCopy", "dialogClose", "continueButton", "reviewWrong", "sidebar", "menuButton"
@@ -99,6 +100,13 @@ function bootApp(initialState, {
     AI103_QUESTIONS: questions || defaultQuestions,
     AI103_MATCHING: matchingData,
     AI103_DRAG_IDS: dragIds,
+    AI103_TIPS: Object.fromEntries((questions || defaultQuestions).map((question) => [question.id, {
+      keywords: `keyword ${question.id}`,
+      answer: question.answer || "answer",
+      mnemonic: `mnemonic ${question.id}`,
+      traps: [{ label: "A", text: `trap ${question.id}` }],
+      ultraShort: `short ${question.id}`
+    }])),
     scrollTo() {}
   };
   const context = vm.createContext({
@@ -158,9 +166,43 @@ function bootApp(initialState, {
     ,clickMenu() { elements.get("menuButton").listeners.click(); }
     ,closeSidebar() { elements.get("sidebarClose").listeners.click(); }
     ,element(id) { return elements.get(id); }
+    ,clickTip() { elements.get("tipButton").listeners.click(); }
+    ,clickQuestion(position) { elements.get("questionGrid").children[position].listeners.click(); }
     ,focusedId() { return ElementStub.focused?.id || ""; }
-  };
+};
 }
+
+test("tip toggle is state-neutral and closes when the question changes", () => {
+  const questions = [
+    { id: 1, stem: "Q1", choices: [{ label: "A", text: "One" }], correct: ["A"], answer: "A", explanation: "", sourcePages: [1], gradable: true, multiple: false },
+    { id: 2, stem: "Q2", choices: [{ label: "A", text: "Two" }], correct: ["A"], answer: "A", explanation: "", sourcePages: [2], gradable: true, multiple: false }
+  ];
+  const app = bootApp(undefined, { questions });
+  const before = app.rawStorage("ai103-mock-state-v1");
+
+  app.clickTip();
+  assert.equal(app.element("tipPanel").hidden, false);
+  assert.equal(app.element("tipButton").getAttribute("aria-expanded"), "true");
+  assert.equal(app.text("tipKeywords"), "keyword 1");
+  assert.equal(app.rawStorage("ai103-mock-state-v1"), before);
+
+  app.clickQuestion(1);
+  assert.equal(app.element("tipPanel").hidden, true);
+  assert.equal(app.element("tipButton").getAttribute("aria-expanded"), "false");
+});
+
+test("exam tips stay locked until submission", () => {
+  const app = bootApp({
+    current: 0, answers: {}, checked: {}, flags: {}, elapsed: 0,
+    paused: false, mode: "exam", retryQueue: [], retryAnswers: {}, retryChecked: {}
+  });
+
+  assert.equal(app.element("tipButton").disabled, true);
+  app.finish();
+  assert.equal(app.element("tipButton").disabled, false);
+  app.clickTip();
+  assert.equal(app.element("tipPanel").hidden, false);
+});
 
 test("AI-103 state ignores an existing AB-100 state", () => {
   const abState = {

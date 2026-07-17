@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
   <div class="app-shell">
@@ -77,9 +77,19 @@
         <section class="question-card" id="questionCard">
           <div class="question-meta">
             <div><span class="question-number" id="questionNumber">Câu 1</span><span class="type-pill" id="typePill">Chọn một đáp án</span></div>
-            <button class="flag-button" id="flagButton" aria-pressed="false">☆ Đánh dấu</button>
+            <div class="question-tools">
+              <button class="tip-button" id="tipButton" type="button" aria-expanded="false" aria-controls="tipPanel">💡 Mẹo</button>
+              <button class="flag-button" id="flagButton" aria-pressed="false">☆ Đánh dấu</button>
+            </div>
           </div>
           <div class="question-stem" id="questionStem"></div>
+          <section class="tip-panel" id="tipPanel" aria-label="Mẹo ghi nhớ cho câu hỏi" hidden>
+            <div class="tip-row"><strong>Keyword:</strong><span id="tipKeywords"></span></div>
+            <div class="tip-answer" id="tipAnswer"></div>
+            <div class="tip-row"><strong>Mẹo nhớ:</strong><span id="tipMnemonic"></span></div>
+            <div class="tip-traps"><strong>Phân biệt bẫy:</strong><ul id="tipTraps"></ul></div>
+            <div class="tip-short"><strong>Bản siêu ngắn:</strong><span id="tipUltraShort"></span></div>
+          </section>
           <div class="choices" id="choices"></div>
           <div class="manual-note" id="manualNote" hidden></div>
 
@@ -119,6 +129,7 @@
 
   <script src="questions.js"></script>
   <script src="matching-data.js"></script>
-  <script src="app.js?v=3"></script>
+  <script src="tips.js"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

@@ -2,6 +2,7 @@
   const questions = window.AI103_QUESTIONS || [];
   const matchingData = window.AI103_MATCHING || {};
   const dragQuestionIds = new Set(window.AI103_DRAG_IDS || []);
+  const tips = window.AI103_TIPS || {};
   const STORAGE_KEY = "ai103-mock-state-v1";
   const THEME_KEY = "ai103-theme";
   const PDF_FILE = "AI-103.pdf";
@@ -11,7 +12,9 @@
     grid: $("questionGrid"), number: $("questionNumber"), type: $("typePill"), stem: $("questionStem"),
     choices: $("choices"), manual: $("manualNote"), answerCard: $("answerCard"), answerStatus: $("answerStatus"),
     correctAnswer: $("correctAnswer"), explanation: $("explanationText"), pageLink: $("pageLink"),
-    prev: $("prevButton"), next: $("nextButton"), check: $("checkButton"), flag: $("flagButton"),
+    prev: $("prevButton"), next: $("nextButton"), check: $("checkButton"), flag: $("flagButton"), tip: $("tipButton"),
+    tipPanel: $("tipPanel"), tipKeywords: $("tipKeywords"), tipAnswer: $("tipAnswer"),
+    tipMnemonic: $("tipMnemonic"), tipTraps: $("tipTraps"), tipUltraShort: $("tipUltraShort"),
     progressText: $("progressText"), progressBar: $("progressBar"), scoreText: $("scoreText"), timer: $("timer"),
     timerToggle: $("timerToggle"), mode: $("modeSelect"), finish: $("finishButton"), clear: $("clearProgress"), theme: $("themeToggle"),
     exportProgress: $("exportProgress"), loadProgress: $("loadProgress"), syncStatus: $("syncStatus"),
@@ -40,6 +43,7 @@
   let lastTick = Date.now();
   let activeDragOption = null;
   let pointerDragState = null;
+  let tipOpen = false;
 
   function applyTheme(theme) {
     document.documentElement.dataset.theme = theme;
@@ -252,9 +256,47 @@
     els.flag.setAttribute("aria-pressed", String(Boolean(state.flags[q.id])));
     els.flag.textContent = state.flags[q.id] ? "★ Đã đánh dấu" : "☆ Đánh dấu";
     els.check.textContent = checked[q.id] ? "Ẩn / hiện đáp án" : (isGradable(q) ? "Kiểm tra đáp án" : "Xem đáp án");
+    renderTip();
     renderAnswer(reveal);
     updateStats();
     renderNav();
+  }
+
+  function tipIsAvailable() {
+    const q = currentQuestion();
+    return Boolean(q && tips[q.id]) && (state.mode !== "exam" || state.examSubmitted);
+  }
+
+  function setTipOpen(open) {
+    tipOpen = Boolean(open) && tipIsAvailable();
+    renderTip();
+  }
+
+  function renderTip() {
+    const q = currentQuestion();
+    const tip = q && tips[q.id];
+    const available = tipIsAvailable();
+    if (!available) tipOpen = false;
+    els.tip.disabled = !available;
+    els.tip.setAttribute("aria-expanded", String(tipOpen));
+    els.tip.title = available ? "Mở hoặc đóng mẹo ghi nhớ" : "Mẹo sẽ mở sau khi nộp bài thi thử";
+    els.tip.setAttribute("aria-label", available ? `Mẹo cho câu ${q?.id}` : "Mẹo bị khóa cho đến khi nộp bài thi thử");
+    els.tipPanel.hidden = !tipOpen;
+    if (!tip || !tipOpen) return;
+    els.tipKeywords.textContent = tip.keywords;
+    els.tipAnswer.textContent = `➡️ ${tip.answer}`;
+    els.tipMnemonic.textContent = tip.mnemonic;
+    els.tipUltraShort.textContent = tip.ultraShort;
+    els.tipTraps.innerHTML = "";
+    tip.traps.forEach((trap) => {
+      const item = document.createElement("li");
+      const label = document.createElement("strong");
+      label.textContent = `${trap.label}: `;
+      const copy = document.createElement("span");
+      copy.textContent = trap.text;
+      item.append(label, copy);
+      els.tipTraps.appendChild(item);
+    });
   }
 
   function renderDragQuestion(q, groups, reveal) {
@@ -517,6 +559,7 @@
   }
 
   function goTo(index) {
+    setTipOpen(false);
     state.current = Math.max(0, Math.min(index, questions.length - 1));
     saveState();
     renderQuestion();
@@ -582,6 +625,7 @@
   }
 
   function changeMode(mode) {
+    setTipOpen(false);
     if (mode === "retry") {
       enterRetryMode();
       return;
@@ -656,6 +700,7 @@
   els.next.addEventListener("click", () => goRelative(1));
   els.check.addEventListener("click", checkCurrent);
   els.flag.addEventListener("click", () => { const q = currentQuestion(); state.flags[q.id] = !state.flags[q.id]; saveState(); renderQuestion(); });
+  els.tip.addEventListener("click", () => setTipOpen(!tipOpen));
   els.finish.addEventListener("click", showResults);
   els.close.addEventListener("click", () => els.dialog.close());
   els.continue.addEventListener("click", () => els.dialog.close());

@@ -76,3 +76,9 @@ test("tip catalog exactly covers all 107 questions with clean text", () => {
   assert.deepEqual(Object.keys(AI103_TIPS).map(Number), Array.from({ length: 107 }, (_, index) => index + 1));
   assert.doesNotMatch(JSON.stringify(AI103_TIPS), /Ã.|â€|Â/);
 });
+
+test("multi-line source explanations stay intact in choice traps", () => {
+  const { AI103_TIPS } = loadData();
+  assert.match(AI103_TIPS[1].traps.find((trap) => trap.label === "B").text, /live transcripts, not translations/);
+  assert.match(AI103_TIPS[1].traps.find((trap) => trap.label === "D").text, /ideal for live scenarios/);
+});

@@ -10,8 +10,9 @@ const REQUIRED_IDS = [
   "sidebar", "sidebarClose", "timer", "timerToggle", "progressText", "progressBar",
   "scoreText", "syncStatus", "exportProgress", "loadProgress", "clearProgress",
   "questionGrid", "sidebarBackdrop", "menuButton", "themeToggle", "modeSelect",
-  "finishButton", "questionCard", "questionNumber", "typePill", "flagButton",
-  "questionStem", "choices", "manualNote", "prevButton", "checkButton", "nextButton",
+  "finishButton", "questionCard", "questionNumber", "typePill", "tipButton", "flagButton",
+  "questionStem", "tipPanel", "tipKeywords", "tipAnswer", "tipMnemonic", "tipTraps",
+  "tipUltraShort", "choices", "manualNote", "prevButton", "checkButton", "nextButton",
   "answerCard", "answerStatus", "pageLink", "correctAnswer", "explanationText",
   "resultDialog", "dialogClose", "resultTitle", "resultScore", "resultCopy",
   "reviewWrong", "continueButton",
@@ -75,6 +76,23 @@ test("AI-103 Azure accent fill tokens are exact", () => {
 test("document preserves the exact application DOM ID contract", () => {
   const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
   assert.deepEqual(ids, REQUIRED_IDS);
+});
+
+test("question card exposes an accessible tip control and structured tip panel", () => {
+  assert.match(html, /id="tipButton"[^>]*aria-expanded="false"[^>]*aria-controls="tipPanel"/);
+  assert.match(html, /id="tipPanel"[^>]*hidden/);
+  for (const id of ["tipKeywords", "tipAnswer", "tipMnemonic", "tipTraps", "tipUltraShort"]) {
+    assert.match(html, new RegExp(`id="${id}"`));
+  }
+  assert.match(html, /<script src="tips\.js"><\/script>\s*<script src="app\.js\?v=4"><\/script>/);
+});
+
+test("tip colors meet WCAG AA contrast in both themes", () => {
+  for (const tokens of [tokensFor(":root"), tokensFor(':root[data-theme="light"]')]) {
+    assert.ok(contrastRatio(tokens["--tip-foreground"], tokens["--tip-surface"]) >= 4.5);
+    assert.ok(contrastRatio(tokens["--tip-muted"], tokens["--tip-surface"]) >= 4.5);
+  }
+  assert.match(css, /\.tip-panel\s*\{[^}]*background:\s*var\(--tip-surface\)[^}]*border:\s*1px solid var\(--tip-border\)/);
 });
 
 test("small accent text has WCAG AA contrast in both themes", () => {

@@ -125,7 +125,7 @@
     const block = correct || incorrectAt < 0 ? explanation.slice(0, incorrectAt < 0 ? undefined : incorrectAt) : explanation.slice(incorrectAt);
     const escapedText = choice.text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const pattern = new RegExp(`(?:^|\\n)${choice.label}\\.\\s+${escapedText}\\s*\\n([\\s\\S]*?)(?=\\n[A-H]\\.\\s|$)`, "m");
-    const match = block.match(pattern);
+    const match = block.match(new RegExp(pattern.source)); // Drop multiline so $ means end of the full explanation.
     if (match?.[1]) return compact(match[1]);
     return correct
       ? `Đúng vì lựa chọn này khớp trực tiếp tín hiệu quyết định của câu hỏi.`
