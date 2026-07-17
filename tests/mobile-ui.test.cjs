@@ -87,7 +87,7 @@ test("question card exposes an accessible tip control and structured tip panel",
   assert.match(html, /<script src="tips-batches\/tips-1-36\.js\?v=2"><\/script>/);
   assert.match(html, /<script src="tips-batches\/tips-37-72\.js\?v=2"><\/script>/);
   assert.match(html, /<script src="tips-batches\/tips-73-107\.js\?v=2"><\/script>/);
-  assert.match(html, /<script src="tips\.js\?v=2"><\/script>\s*<script src="app\.js\?v=5"><\/script>/);
+  assert.match(html, /<script src="tips\.js\?v=2"><\/script>\s*<script src="app\.js\?v=6"><\/script>/);
 });
 
 test("question card can display restored case-study context before the stem", () => {

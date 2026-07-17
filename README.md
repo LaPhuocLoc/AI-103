@@ -10,7 +10,7 @@ Mở trực tiếp `index.html` bằng trình duyệt để học trên máy cá
 
 - **Luyện tập**: kiểm tra từng câu và xem đáp án, giải thích ngay.
 - **Thi thử**: làm bài liên tục, không hiện đáp án trước khi kết thúc.
-- **Làm lại câu sai**: tạo danh sách từ các câu trả lời sai, chưa hoàn thành hoặc đã đánh dấu.
+- **Làm lại câu sai**: tạo danh sách từ các câu đã trả lời sai hoặc đã đánh dấu; câu chưa làm không bị đưa vào danh sách.
 
 ## Mẹo cho từng câu
 
@@ -30,7 +30,7 @@ Tiến độ được tự động lưu cục bộ trong `localStorage` của t�
 2. Có thể lưu file này làm bản sao cá nhân. Nếu muốn website triển khai nạp bản đó, thay file `ai103-progress-state.json` đã commit trong repository rồi commit và triển khai lại.
 3. Trên trình duyệt khác, bấm **Nạp từ Git** để tải bản state đã triển khai. Thao tác này ghi đè tiến độ cục bộ khi file chứa dữ liệu làm bài.
 
-File `ai103-progress-state.json` đi kèm repository là state sạch ở chế độ luyện tập. Chỉ file có tên này được ứng dụng xuất và tải; không đổi sang tên khác.
+File `ai103-progress-state.json` đi kèm repository là bản state được commit gần nhất, có thể là state sạch hoặc tiến độ đã xuất. Chỉ file có tên này được ứng dụng xuất và tải; không đổi sang tên khác.
 
 ## Tạo lại dữ liệu từ PDF
 

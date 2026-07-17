@@ -470,7 +470,7 @@ test("loading a non-submitted retry clears prior submitted scoring", async () =>
   assert.equal(app.text("scoreText"), "1 / 1");
 });
 
-test("fresh retry includes incorrect, incomplete, and flagged questions", () => {
+test("fresh retry includes answered wrong and flagged questions but excludes incomplete questions", () => {
   const questions = [
     { id: 1, stem: "One", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
     { id: 2, stem: "Two", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
@@ -482,9 +482,70 @@ test("fresh retry includes incorrect, incomplete, and flagged questions", () => 
   }, { questions });
 
   app.changeMode("retry");
-  assert.deepEqual(app.state().retryQueue, [1, 2, 3]);
+  assert.deepEqual(app.state().retryQueue, [1, 3]);
   app.finish();
-  assert.match(app.text("resultCopy"), /chưa hoàn thành/);
+  assert.doesNotMatch(app.text("resultCopy"), /chưa hoàn thành/);
+});
+
+test("retry mode drops stale incomplete question IDs from an existing queue", () => {
+  const questions = [
+    { id: 1, stem: "Wrong", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
+    { id: 2, stem: "Incomplete", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
+    { id: 3, stem: "Incomplete", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false }
+  ];
+  const app = bootApp({
+    current: 0, answers: { 1: ["A"] }, checked: { 1: true }, flags: {}, elapsed: 0,
+    paused: false, mode: "practice", retryQueue: [1, 2, 3], retryAnswers: {}, retryChecked: {}
+  }, { questions });
+
+  app.changeMode("retry");
+
+  assert.deepEqual(app.state().retryQueue, [1]);
+});
+
+test("state normalization repairs a stale retry queue before the first render", () => {
+  const questions = [
+    { id: 1, stem: "Wrong", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
+    { id: 2, stem: "Incomplete", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
+    { id: 3, stem: "Incomplete", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false }
+  ];
+  const app = bootApp({
+    current: 2, answers: { 1: ["A"] }, checked: { 1: true }, flags: {}, elapsed: 0,
+    paused: false, mode: "retry", retryQueue: [1, 2, 3], retryAnswers: {}, retryChecked: {}
+  }, { questions });
+
+  assert.equal(app.state().mode, "retry");
+  assert.deepEqual(app.state().retryQueue, [1]);
+  assert.equal(app.state().current, 0);
+});
+
+test("practice retry ignores selected wrong answers that were never checked", () => {
+  const questions = [
+    { id: 1, stem: "Selected only", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false },
+    { id: 2, stem: "Checked wrong", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false }
+  ];
+  const app = bootApp({
+    current: 0, answers: { 1: ["A"], 2: ["A"] }, checked: { 1: false, 2: true }, flags: {}, elapsed: 0,
+    paused: false, mode: "practice", retryQueue: [1, 2], retryAnswers: {}, retryChecked: {}
+  }, { questions });
+
+  app.changeMode("retry");
+
+  assert.deepEqual(app.state().retryQueue, [2]);
+});
+
+test("retry includes wrong exam answers after the exam is submitted", () => {
+  const questions = [
+    { id: 1, stem: "Exam wrong", choices: [{ label: "A", text: "A" }, { label: "B", text: "B" }], correct: ["B"], answer: "B", explanation: "", sourcePages: [1], gradable: true, multiple: false }
+  ];
+  const app = bootApp({
+    current: 0, answers: { 1: ["A"] }, checked: {}, flags: {}, elapsed: 0,
+    paused: false, mode: "exam", examSubmitted: true, retryQueue: [], retryAnswers: {}, retryChecked: {}
+  }, { questions });
+
+  app.changeMode("retry");
+
+  assert.deepEqual(app.state().retryQueue, [1]);
 });
 
 test("an existing navigation/timer/mode-only local state prevents automatic committed fetch", () => {
@@ -514,8 +575,8 @@ test("normalization rejects malformed question keyed state and repairs retry sco
   }, { questions, matchingData });
 
   assert.deepEqual(app.state(), {
-    current: 1, answers: { 1: ["B"], 2: { 0: "Y" } }, checked: { 1: true }, flags: { 2: false },
-    elapsed: 5, paused: false, mode: "retry", retryQueue: [2], retryAnswers: {}, retryChecked: { 2: true },
+    current: 0, answers: { 1: ["B"], 2: { 0: "Y" } }, checked: { 1: true }, flags: { 2: false },
+    elapsed: 5, paused: false, mode: "practice", retryQueue: [], retryAnswers: {}, retryChecked: { 2: true },
     examSubmitted: false, retrySubmitted: false
   });
 });

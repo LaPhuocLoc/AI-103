@@ -87,9 +87,19 @@
         return normalized.length ? [[id, normalized]] : [];
       })
     );
+    const answers = normalizeAnswers(raw.answers);
+    const checked = normalizeBooleanMap(raw.checked);
+    const flags = normalizeBooleanMap(raw.flags);
+    const eligibleRetryIds = new Set(questions
+      .filter((q) => Boolean(flags[q.id]) || (
+        isGradable(q) && (Boolean(checked[q.id]) || Boolean(raw.examSubmitted)) &&
+        answered(q, answers, checked) && !isCorrect(q, answers)
+      ))
+      .map((q) => q.id));
+    const canRepairRetryQueue = Object.keys(answers).length > 0 || Object.values(flags).some(Boolean);
     const validRetryIds = [...new Set(
       (Array.isArray(raw.retryQueue) ? raw.retryQueue : [])
-        .filter((id) => Number.isInteger(id) && questionById.has(id))
+        .filter((id) => Number.isInteger(id) && questionById.has(id) && (!canRepairRetryQueue || eligibleRetryIds.has(id)))
     )];
     let mode = allowedModes.has(raw.mode) ? raw.mode : "practice";
     if (mode === "retry" && !validRetryIds.length) mode = "practice";
@@ -100,9 +110,9 @@
     return {
       ...blankState(),
       current,
-      answers: normalizeAnswers(raw.answers),
-      checked: normalizeBooleanMap(raw.checked),
-      flags: normalizeBooleanMap(raw.flags),
+      answers,
+      checked,
+      flags,
       elapsed: Number.isFinite(raw.elapsed) && raw.elapsed >= 0 ? raw.elapsed : 0,
       paused: Boolean(raw.paused),
       mode,
@@ -590,25 +600,32 @@
     if (index >= 0) goTo(index);
   }
 
+  function wrongAnsweredQuestions() {
+    return questions.filter((q) =>
+      isGradable(q) && (Boolean(state.checked[q.id]) || state.examSubmitted) &&
+      answered(q, state.answers, state.checked) && !isCorrect(q, state.answers)
+    );
+  }
+
   function enterRetryMode() {
     const previousMode = state.mode;
     const existingQueue = Array.isArray(state.retryQueue) ? state.retryQueue : [];
     const retryAnswers = state.retryAnswers || (state.retryAnswers = {});
     const retryChecked = state.retryChecked || (state.retryChecked = {});
+    const wrongIds = wrongAnsweredQuestions().map((q) => q.id);
+    const flaggedIds = questions.filter((q) => Boolean(state.flags[q.id])).map((q) => q.id);
+    const eligibleIds = [...new Set([...wrongIds, ...flaggedIds])];
+    const eligibleSet = new Set(eligibleIds);
     const unfinishedExisting = existingQueue.filter((id) => {
       const q = questions.find((item) => item.id === id);
-      return q && (!answered(q, retryAnswers, retryChecked) || !isCorrect(q, retryAnswers));
+      return eligibleSet.has(id) && q && (!answered(q, retryAnswers, retryChecked) || !isCorrect(q, retryAnswers));
     });
     const unfinishedIds = new Set(unfinishedExisting);
-    const incorrectOrIncompleteIds = questions
-      .filter((q) => !answered(q, state.answers, state.checked) || (isGradable(q) && !isCorrect(q, state.answers)))
-      .map((q) => q.id);
-    const flaggedIds = questions.filter((q) => Boolean(state.flags[q.id])).map((q) => q.id);
-    const retryQueue = [...new Set([...unfinishedExisting, ...incorrectOrIncompleteIds, ...flaggedIds])];
+    const retryQueue = [...new Set([...unfinishedExisting, ...eligibleIds])];
 
     if (!retryQueue.length) {
       els.mode.value = previousMode;
-      alert("Chưa có câu sai, chưa hoàn thành hoặc được đánh dấu để làm lại.");
+      alert("Chưa có câu trả lời sai hoặc được đánh dấu để làm lại.");
       return;
     }
 
@@ -671,7 +688,7 @@
     const percent = graded.length ? Math.round(correct / graded.length * 100) : 0;
     els.resultScore.textContent = `${percent}%`;
     els.resultCopy.textContent = state.mode === "retry"
-      ? `Đúng ${correct}/${graded.length} câu có thể chấm tự động. Đã làm lại ${scope.filter((q) => answered(q)).length}/${scope.length} câu sai, chưa hoàn thành hoặc được đánh dấu.`
+      ? `Đúng ${correct}/${graded.length} câu có thể chấm tự động. Đã làm lại ${scope.filter((q) => answered(q)).length}/${scope.length} câu sai hoặc được đánh dấu.`
       : `Đúng ${correct}/${graded.length} câu có thể chấm tự động. Đã xử lý ${scope.filter((q) => answered(q)).length}/${scope.length} câu toàn bộ đề.`;
     els.dialog.showModal();
   }

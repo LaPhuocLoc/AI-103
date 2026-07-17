@@ -79,23 +79,19 @@ test("repository documentation and portable state are AI-103-specific", () => {
   assert.match(readme, /AI-103 Mock Exam/);
   assert.match(readme, /107/);
   assert.match(readme, /tiếng Việt/);
-  assert.match(readme, /tạo danh sách từ các câu trả lời sai, chưa hoàn thành hoặc đã đánh dấu\./);
+  assert.match(readme, /tạo danh sách từ các câu đã trả lời sai hoặc đã đánh dấu; câu chưa làm không bị đưa vào danh sách\./);
   assert.doesNotMatch(readme, /AB-100/);
-  assert.deepEqual(state.state, {
-    current: 0,
-    answers: {},
-    checked: {},
-    flags: {},
-    elapsed: 0,
-    paused: false,
-    mode: "practice",
-    examSubmitted: false,
-    retrySubmitted: false,
-    retryQueue: [],
-    retryAnswers: {},
-    retryChecked: {}
-  });
   assert.equal(state.schemaVersion, 1);
+  assert.match(state.exportedAt, /^\d{4}-\d{2}-\d{2}T/);
+  assert.ok(Number.isInteger(state.state.current));
+  assert.ok(["practice", "exam", "retry"].includes(state.state.mode));
+  for (const key of ["answers", "checked", "flags", "retryAnswers", "retryChecked"]) {
+    assert.equal(typeof state.state[key], "object", `${key} must be an object`);
+    assert.equal(Array.isArray(state.state[key]), false, `${key} must not be an array`);
+  }
+  assert.ok(Array.isArray(state.state.retryQueue));
+  assert.equal(typeof state.state.examSubmitted, "boolean");
+  assert.equal(typeof state.state.retrySubmitted, "boolean");
   assert.equal(fs.existsSync(`${root}/progress-state.json`), false);
   assert.equal(fs.existsSync(`${root}/AB-100.pdf`), false);
   assert.deepEqual(fs.readdirSync(root).filter((name) => name.endsWith(".pdf")), ["AI-103.pdf"]);
